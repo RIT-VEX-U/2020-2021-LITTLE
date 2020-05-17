@@ -2,6 +2,7 @@
 #define _HARDWARE_
 
 #include "vex.h"
+#include "core.h"
 
 using namespace vex;
 
