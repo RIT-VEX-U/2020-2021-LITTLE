@@ -1,8 +1,9 @@
 #ifndef _SWERVEDRIVE_
 #define _SWERVEDRIVE_
 
-#include "../Core/include/subsystems/swerve_module.h"
-#include "../Core/include/utils/vector.h"
+#include "../core/include/subsystems/swerve_module.h"
+#include "../core/include/utils/vector.h"
+#include "../core/include/utils/pid.h"
 
 #define ROT_DEADBAND 0.2
 #define LAT_DEADBAND 0.2
@@ -15,7 +16,7 @@ public:
 /**
  * Construct the SwerveDrive object.
  */
-SwerveDrive(SwerveModule &left_front, SwerveModule &left_rear, SwerveModule &right_front, SwerveModule &right_rear);
+SwerveDrive(SwerveModule &left_front, SwerveModule &left_rear, SwerveModule &right_front, SwerveModule &right_rear, vex::inertial &imu);
 
 /**
  * Drive the robot using controller inputs. Deadbands are automatically taken into
@@ -29,9 +30,29 @@ void drive(int32_t leftY, int32_t leftX, int32_t rightX);
  */
 void drive(Vector lateral, double rotation);
 
+/**
+ * Autonomously drive the robot in (degrees) direction, at (-1.0 -> 1.0) speed, for (inches) distance.
+ * Indicate a negative speed or distance, or (preferably) a direction of +-180 degrees for backwards.
+ */
+bool auto_drive(double direction, double speed, double distance);
+
+/**
+ * Autonomously turn the robot over it's center axis in degrees. Positive degrees is clockwise, Negative is counter-clockwise
+ * Speed is in percent (-1.0 -> 1.0)
+ */
+bool auto_turn(double degrees, double speed);
+
+void set_drive_pid(PID::pid_config_t &config);
+void set_turn_pid(PID::pid_config_t &config);
+
 private:
 
 SwerveModule &left_front, &left_rear, &right_front, &right_rear;
+bool auto_drive_init = true;
+bool auto_turn_init = true;
+
+PID *drive_pid, *turn_pid;
+vex::inertial &imu;
 
 };
 
