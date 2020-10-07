@@ -8,6 +8,7 @@
  */
 
 #include "vex.h"
+#include "initialize.h"
 #include "competition/autonomous.h"
 #include "competition/opcontrol.h"
 
@@ -27,6 +28,8 @@ competition comp;
  */
 int main()
 {
+  Init::vexcodeInit();
+
   comp.autonomous(Auto::autonomous);
   comp.drivercontrol(OpControl::opcontrol);
 

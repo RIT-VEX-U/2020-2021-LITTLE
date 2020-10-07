@@ -1,3 +1,4 @@
+#include "initialize.h"
 #include "vex.h"
 #include "config.h"
 #include "hardware.h"
@@ -9,7 +10,7 @@ using namespace vex;
  *
  * This should be called at the start of your int main function.
  */
-void vexcodeInit(void)
+void Init::vexcodeInit(void)
 {
   // Initialize the robot configuration variables
   Config::initConfig();
