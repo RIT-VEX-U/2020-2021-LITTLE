@@ -24,6 +24,22 @@ extern brain v5_brain;
 extern controller master;
 extern controller partner;
 
+extern motor lf, rf, lr, rr;
+
+extern MecanumDrive mec_drive;
+
+extern motor intakeLeft;
+extern motor intakeRight;
+extern motor_group intake;
+
+extern motor front_rollers;
+extern motor top_roller;
+extern motor bottom_roller;
+
+extern optical optic;
+
+extern limit limit_switch;
+
 //End Hardware Declarations
 } // namespace Hardware
 

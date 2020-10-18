@@ -8,6 +8,7 @@
 //Subsystems
 #include "../core/include/subsystems/rgb_controller.h"
 #include "../core/include/subsystems/tank_drive.h"
+#include "../core/include/subsystems/mecanum_drive.h"
 
 //Utils
 #include "../core/include/utils/pid.h"
