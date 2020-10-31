@@ -19,13 +19,13 @@ namespace Hardware
 // Hardware Declared Below
 // Form: extern [class_name] [name];
 
+// -- BRAIN & CONTROLLER(S) --
 extern brain v5_brain;
-
 extern controller master;
 extern controller partner;
 
+// -- MOTORS --
 extern motor lf, rf, lr, rr;
-
 extern MecanumDrive mec_drive;
 
 extern motor intakeLeft;
@@ -36,9 +36,12 @@ extern motor front_rollers;
 extern motor top_roller;
 extern motor bottom_roller;
 
-extern optical optic;
+extern motor flywheel;
 
+// -- SENSORS --
+extern optical optic;
 extern limit limit_switch;
+extern rotation enc_wheel;
 
 //End Hardware Declarations
 } // namespace Hardware
