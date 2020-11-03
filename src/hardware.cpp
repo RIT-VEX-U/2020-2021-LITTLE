@@ -9,20 +9,22 @@ controller Hardware::master(controllerType::primary);
 controller Hardware::partner(controllerType::partner);
 
 // -- MOTORS --
-motor Hardware::lf(PORT13), Hardware::rf(PORT20, true), Hardware::lr(PORT12), Hardware::rr(PORT19, true);
+motor Hardware::lf(PORT13, gearSetting::ratio36_1), Hardware::rf(PORT20, gearSetting::ratio36_1, true),
+      Hardware::lr(PORT12, gearSetting::ratio36_1), Hardware::rr(PORT19, gearSetting::ratio36_1, true);
 MecanumDrive Hardware::mec_drive(lf, rf, lr, rr);
 
 motor Hardware::intakeLeft(PORT15);
 motor Hardware::intakeRight(PORT9, true);
 motor_group Hardware::intake(Hardware::intakeLeft, Hardware::intakeRight);
 
-motor Hardware::front_rollers(PORT10, true);
+motor Hardware::front_rollers(PORT10, gearSetting::ratio6_1, true);
 motor Hardware::bottom_roller(PORT18, gearSetting::ratio6_1);
 motor Hardware::top_roller(PORT17, gearSetting::ratio6_1);
 
-motor Hardware::flywheel(PORT8);
+motor Hardware::flywheel(PORT8, gearSetting::ratio6_1, true);
 
 // -- SENSORS --
+inertial Hardware::inertia(PORT16);
 optical Hardware::optic(PORT7);
 // TODO: If anyone finds a better way to use the 3 wire ports, PLEASE fix this :)
 limit Hardware::limit_switch(Hardware::v5_brain.ThreeWirePort.C);
