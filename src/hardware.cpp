@@ -9,8 +9,8 @@ controller Hardware::master(controllerType::primary);
 controller Hardware::partner(controllerType::partner);
 
 // -- MOTORS --
-motor Hardware::lf(PORT13, gearSetting::ratio36_1), Hardware::rf(PORT20, gearSetting::ratio36_1, true),
-      Hardware::lr(PORT12, gearSetting::ratio36_1), Hardware::rr(PORT19, gearSetting::ratio36_1, true);
+motor Hardware::lf(PORT13, gearSetting::ratio36_1, true), Hardware::rf(PORT20, gearSetting::ratio36_1),
+      Hardware::lr(PORT12, gearSetting::ratio36_1, true), Hardware::rr(PORT19, gearSetting::ratio36_1);
 MecanumDrive Hardware::mec_drive(lf, rf, lr, rr);
 
 motor Hardware::intakeLeft(PORT15);
