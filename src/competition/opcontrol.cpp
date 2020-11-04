@@ -101,6 +101,7 @@ void printPrevColor() {
       break;
   }
 
+  master.Screen.setCursor(3, 1);
   master.Screen.print(hues[color_index]);
 } 
 
@@ -111,8 +112,11 @@ void printPrevColor() {
  */
 void ejectOrScore() {
   // give the ball time to reach the optical sensor before reading
-  wait(200, timeUnits::msec);
+  wait(50, timeUnits::msec);
   int curr_hue = optic.hue();
+
+  hues[color_index] = curr_hue;
+  color_index++;
 
   // The direction of the top roller, determines whether the ball moves 
   // towards the flywheel or gets ejected (default: toward flywheel, fwd)
@@ -128,6 +132,7 @@ void ejectOrScore() {
     // red: flywheel
     case 1:
     default:
+      flywheel.spin(directionType::fwd, 50, velocityUnits::pct);
       up_or_out = directionType::fwd;
       break;
   }
@@ -139,6 +144,7 @@ void ejectOrScore() {
   // give the ball time to be ejected or scored
   // TODO: WILL BE REPLACED BY LIMIT SWITCH(ES)
   wait(1000, timeUnits::msec);
+  flywheel.stop();
   bottom_roller.stop();
   top_roller.stop();
 }
@@ -158,8 +164,10 @@ void OpControl::opcontrol()
   // call the function until the switch/button is released
   limit_switch.pressed(&ejectOrScore);
 
+  bool kill = false;
+
   // OpControl Loop
-  while (true)
+  while (!kill)
   {
     mec_drive.drive(master.Axis3.position(), master.Axis4.position(), master.Axis1.position());
 
@@ -167,7 +175,7 @@ void OpControl::opcontrol()
     // NOTE: only front_rollers and intake are user-controlled, the other rollers
     // are controlled by the limit switch and optical sensor inputs
     if(master.ButtonR2.pressing()) {
-      front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
+      front_rollers.spin(directionType::fwd, 50, velocityUnits::pct);
       intake.spin(directionType::fwd, 100, velocityUnits::pct);
     }
     else {
@@ -175,6 +183,13 @@ void OpControl::opcontrol()
       intake.stop();
     }
 
+    if(master.ButtonL2.pressing()) {
+      kill = true;
+    }
+
     vexDelay(20); // Small delay to allow time-sensitive functions to work properly.
   }
+
+  master.ButtonLeft.pressed(&printPrevColor);
+  master.ButtonRight.pressed(&printNextColor);
 }
