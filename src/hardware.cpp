@@ -17,7 +17,7 @@ motor Hardware::intakeLeft(PORT15);
 motor Hardware::intakeRight(PORT9, true);
 motor_group Hardware::intake(Hardware::intakeLeft, Hardware::intakeRight);
 
-motor Hardware::front_rollers(PORT10, gearSetting::ratio6_1, true);
+motor Hardware::front_rollers(PORT10, gearSetting::ratio6_1);
 motor Hardware::bottom_roller(PORT18, gearSetting::ratio6_1);
 motor Hardware::top_roller(PORT17, gearSetting::ratio6_1);
 
