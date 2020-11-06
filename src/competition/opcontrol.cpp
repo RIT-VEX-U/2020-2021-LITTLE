@@ -17,7 +17,7 @@ void printToController(float lf, float rr) {
   master.Screen.print(rr);
 }
 
-// -- OPTICAL SENSOR TESTING: TO BE REMOVED --
+// -- OPTICAL SENSOR --
 
 // NOTE: The values that can be seen when running the optical sensor
 // directly through the brain are the values returned by the HUE()
@@ -26,12 +26,16 @@ void printToController(float lf, float rr) {
 // ***ONLY hue() is to be used to retrieve "color" values from the
 // optical sensor
 
+// The current "hue" value that the optical sensor is returning
+// Will be continuously updated within its own task
 int curr_hue;
-// stores up to 20 hue values taken from the optic sensor
-int hues[40];
-// index that can currently be stored in
-int color_index = 0;
 
+/* 
+ * Taking the current "hue" value from the optical sensor
+ * Will be run in its own task
+ * @return task functions need to return an int for some
+ *  reason, so just ignore the return statement
+ */
 int opticSample() {
   while(true) {
     curr_hue = optic.hue();
@@ -54,6 +58,42 @@ int checkColorRange(int hue_value) {
   
   return 0;
 }
+
+// Note: The direction of the top roller determines whether the ball moves 
+// towards the flywheel or gets ejected
+
+void eject() {
+  // rollers spin in order to eject
+  bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
+  top_roller.spin(directionType::rev, 100, velocityUnits::pct);
+
+  // give the ball time to be ejected
+  // TODO: WILL BE REPLACED BY DISTANCE SENSOR
+  wait(500, timeUnits::msec);
+  bottom_roller.stop();
+  top_roller.stop();
+}
+
+void score() {
+  // rollers + flywheel spin in order to score
+  bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
+  top_roller.spin(directionType::fwd, 100, velocityUnits::pct);
+  flywheel.spin(directionType::fwd, 50, velocityUnits::pct);
+
+  // give the ball time to be scored
+  // TODO: WILL BE REPLACED BY DISTANCE SENSOR
+  wait(500, timeUnits::msec);
+  flywheel.stop();
+  bottom_roller.stop();
+  top_roller.stop();
+}
+
+// -- OPTICAL SENSOR TESTING: TO BE REMOVED --
+
+// stores up to 20 hue values taken from the optic sensor
+int hues[40];
+// index that can currently be stored in
+int color_index = 0;
 
 /*
  * Print the next value in the hues array to the controller
@@ -113,32 +153,6 @@ void printPrevColor() {
 
   master.Screen.setCursor(3, 1);
   master.Screen.print(hues[color_index]);
-} 
-
-/*
- * Determines whether the ball is of a color we want to score
- * or eject and runs the roller motors accordingly
- * Currently, the function EJECTS BLUES and SCORES REDS
- */
-void ejectOrScore(bool eject) {
-  // The direction of the top roller, determines whether the ball moves 
-  // towards the flywheel or gets ejected (default: toward flywheel, fwd)
-  directionType up_or_out = eject ? directionType::rev : directionType::fwd;
-
-  if(!eject) {
-    flywheel.spin(directionType::fwd, 50, velocityUnits::pct);
-  }
-
-  // rollers spin in order to either eject or score
-  bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
-  top_roller.spin(up_or_out, 100, velocityUnits::pct);
-
-  // give the ball time to be ejected or scored
-  // TODO: WILL BE REPLACED BY LIMIT SWITCH(ES)
-  wait(500, timeUnits::msec);
-  flywheel.stop();
-  bottom_roller.stop();
-  top_roller.stop();
 }
 
 /**
@@ -151,17 +165,16 @@ void OpControl::opcontrol()
   // optical sensor is more consistent when the led is on full power
   optic.setLight(ledState::on);
 
+  // Make a task out of the function opticSample
+  // Tasks are similar to threads, they are executed in parallel
+  //  with the main process
   task optic_sample = task(&opticSample);
 
-  // when the limit switch is activated, ejectOrScore() is called ONCE
-  // NOTE: This is different from pressing(), which will continue to
-  // call the function until the switch/button is released
-  //limit_switch.pressed(&ejectOrScore);
-
-  bool kill = false;
+  //
+  int hue_total = 0, reads = 0;
 
   // OpControl Loop
-  while (!kill)
+  while (true)
   {
     mec_drive.drive(master.Axis3.position(), master.Axis4.position(), master.Axis1.position());
 
@@ -170,43 +183,44 @@ void OpControl::opcontrol()
     // are controlled by the limit switch and optical sensor inputs
     if(master.ButtonR2.pressing()) {
       front_rollers.spin(directionType::fwd, 50, velocityUnits::pct);
-      bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
-      top_roller.spin(directionType::rev, 100, velocityUnits::pct);
       intake.spin(directionType::fwd, 100, velocityUnits::pct);
     }
     else {
       front_rollers.stop();
-      bottom_roller.stop();
-      top_roller.stop();
       intake.stop();
     }
 
-    int hue_total = 0, reads = 0;
-    while(limit_switch.pressing()) {
+    // -- COLOR FILTERING --
+
+    if(limit_switch.pressing()) {
       hue_total += curr_hue;
       reads++;
-      //std::cout << curr_hue << "\n";
-      vexDelay(10);
     }
-    
-    if(reads > 0) {
-      //std::cout << "average:" << (hue_total / reads) << "\n";
+    else if(reads > 0) {
       int avg = hue_total / reads;
-      hues[color_index] = avg;
-      color_index++;
-      int color = checkColorRange((hue_total / reads));
-      ejectOrScore(color == 2);
-    }
+      int color_range = checkColorRange(avg);
 
-    if(master.ButtonL2.pressing()) {
-      kill = true;
+      switch(color_range) {
+        // red
+        case 1:
+          score();
+          break;
+        // blue
+        case 2:
+          eject();
+          break;
+      }
+
+      // reset color filtering variables
+      hue_total = 0, reads = 0;
     }
 
     vexDelay(10); // Small delay to allow time-sensitive functions to work properly.
   }
 
-  optic_sample.stop();
+  // -- OPTICAL SENSOR TESTING: TO BE REMOVED --
+  // optic_sample.stop();
 
-  master.ButtonLeft.pressed(&printPrevColor);
-  master.ButtonRight.pressed(&printNextColor);
+  // master.ButtonLeft.pressed(&printPrevColor);
+  // master.ButtonRight.pressed(&printNextColor);
 }
