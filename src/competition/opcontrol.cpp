@@ -50,7 +50,7 @@ int timeOut() {
   return 1;
 }
 
-// -- OPTICAL SENSOR --
+// -- COLOR FILTERING --
 
 // NOTE: The values that can be seen when running the optical sensor
 // directly through the brain are the values returned by the HUE()
@@ -59,9 +59,35 @@ int timeOut() {
 // ***ONLY hue() is to be used to retrieve "color" values from the
 // optical sensor
 
+// Color filtering has 2 modes:
+// Store Mode:
+//    The robot can hold 2 balls at once and will wait for user
+//    input before attempting to score or eject
+// Auto Mode: (typically used on goals)
+//    The robot will automatically eject or score a ball, depending
+//    on its color
+bool store_mode = true;
+
+// STORE MODE:
+
+// Keeps track of the colors of both stored balls (using vals from checkColorRange)
+int ball_hues[2];
+// Keeps track of how many balls are currently being stored
+int num_balls = 0;
+
+// BOTH MODES:
+
 // The current "hue" value that the optical sensor is returning
 // Will be continuously updated within its own task
 int curr_hue;
+
+void changeModes() {
+  store_mode = !store_mode;
+  const char *mode_msg = store_mode ? "STORE MODE" : "AUTO MODE";
+  master.Screen.clearScreen();
+  master.Screen.setCursor(1, 1);
+  master.Screen.print(mode_msg);
+}
 
 /* 
  * Taking the current "hue" value from the optical sensor
@@ -121,6 +147,19 @@ void score() {
   flywheel.stop();
   bottom_roller.stop();
   top_roller.stop();
+}
+
+void ejectOrScore(int color_range) {
+  switch(color_range) {
+    // red
+    case 1:
+      score();
+      break;
+    // blue
+    case 2:
+      eject();
+      break;
+  }
 }
 
 // -- OPTICAL SENSOR TESTING: TO BE REMOVED --
@@ -209,6 +248,10 @@ void OpControl::opcontrol()
   // Used for taken the average of the hues read
   int hue_total = 0, reads = 0;
 
+  master.ButtonL2.pressed(&eject);
+  master.ButtonL1.pressed(&score);
+  master.ButtonDown.pressed(&changeModes);
+
   // OpControl Loop
   while (true)
   {
@@ -236,15 +279,12 @@ void OpControl::opcontrol()
       int avg = hue_total / reads;
       int color_range = checkColorRange(avg);
 
-      switch(color_range) {
-        // red
-        case 1:
-          score();
-          break;
-        // blue
-        case 2:
-          eject();
-          break;
+      if(store_mode) {
+        ball_hues[num_balls] = color_range;
+        num_balls++;
+      }
+      else {
+        ejectOrScore(color_range);
       }
 
       // reset color filtering variables
