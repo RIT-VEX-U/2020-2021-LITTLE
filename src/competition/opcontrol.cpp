@@ -99,10 +99,10 @@ void eject() {
   bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
   top_roller.spin(directionType::rev, 100, velocityUnits::pct);
 
-  task time_out_task = task(&timeOut);
+  //task time_out_task = task(&timeOut);
   
   // TODO: Find actual value to replace 100
-  while(ejection.objectDistance(distanceUnits::mm) < 100 && !time_out) {}
+  while(ejection.objectDistance(distanceUnits::mm) > 100 /*&& !time_out*/) {}
 
   bottom_roller.stop();
   top_roller.stop();
