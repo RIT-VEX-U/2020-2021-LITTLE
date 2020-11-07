@@ -18,6 +18,7 @@ void printToController(float lf, float rr) {
 }
 
 // -- TIME OUT --
+// WARNING: CURRENTLY BROKEN
 
 // Using a timer from the vex api, a task will determine whether or not a
 // specified amount of miliseconds has passed since a function began.
@@ -204,7 +205,8 @@ void OpControl::opcontrol()
   //  with the main process
   task optic_sample = task(&opticSample);
 
-  //
+  // Variables for color filtering
+  // Used for taken the average of the hues read
   int hue_total = 0, reads = 0;
 
   // OpControl Loop
