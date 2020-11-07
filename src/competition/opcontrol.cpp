@@ -17,6 +17,38 @@ void printToController(float lf, float rr) {
   master.Screen.print(rr);
 }
 
+// -- TIME OUT --
+
+// Using a timer from the vex api, a task will determine whether or not a
+// specified amount of miliseconds has passed since a function began.
+// To use the time out, begin the task at the start of a function with:
+//    task time_out_task = task(&timeOut).
+// The global variable:
+//    time_out 
+// can be used to tell whether or not the function has used up its time.
+
+timer t = timer();
+
+// Represents whether or not a function has used up its time
+bool time_out = false;
+
+/*
+ * Should be used as a task at the start of a function or loop
+ * @return task functions need to return an int for some
+ *  reason, so just ignore the return statement
+ */
+int timeOut() {
+  // reset
+  time_out = false;
+  t.clear();
+
+  // Note: may change to a thread so I can send this an arg for how much time
+  // the function / loop can run. For now, the default is 500 ms
+  while(t.time() < 500) {}
+  time_out = true;
+  return 1;
+}
+
 // -- OPTICAL SENSOR --
 
 // NOTE: The values that can be seen when running the optical sensor
@@ -67,9 +99,11 @@ void eject() {
   bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
   top_roller.spin(directionType::rev, 100, velocityUnits::pct);
 
-  // give the ball time to be ejected
-  // TODO: WILL BE REPLACED BY DISTANCE SENSOR
-  wait(500, timeUnits::msec);
+  task time_out_task = task(&timeOut);
+  
+  // TODO: Find actual value to replace 100
+  while(ejection.objectDistance(distanceUnits::mm) < 100 && !time_out) {}
+
   bottom_roller.stop();
   top_roller.stop();
 }

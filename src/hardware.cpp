@@ -29,5 +29,7 @@ optical Hardware::optic(PORT7);
 // TODO: If anyone finds a better way to use the 3 wire ports, PLEASE fix this :)
 limit Hardware::limit_switch(Hardware::v5_brain.ThreeWirePort.C);
 rotation Hardware::enc_wheel(PORT11);
+// TODO: Find an actual port for this
+distance Hardware::ejection(PORT1);
 
 // End Hardware Initialization
