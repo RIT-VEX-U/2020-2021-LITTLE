@@ -212,7 +212,8 @@ void OpControl::opcontrol()
   // OpControl Loop
   while (true)
   {
-    mec_drive.drive(master.Axis3.position(), master.Axis4.position(), master.Axis1.position());
+    //mec_drive.drive(master.Axis3.position(), master.Axis4.position(), master.Axis1.position());
+    tank_drive.drive_tank(master.Axis1.value() / 100, master.Axis3.value() / 100);
 
     // -- TEMP OP CONTROL --
     // NOTE: only front_rollers and intake are user-controlled, the other rollers

@@ -27,6 +27,7 @@ extern controller partner;
 // -- MOTORS --
 extern motor lf, rf, lr, rr;
 extern MecanumDrive mec_drive;
+extern TankDrive tank_drive;
 
 extern motor intakeLeft;
 extern motor intakeRight;
