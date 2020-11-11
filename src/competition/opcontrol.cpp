@@ -116,6 +116,7 @@ void eject() {
   front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
 
   task time_out_task = task(&timeOut);
+  wait(10, timeUnits::msec);  // wait for time_out to be set to false again
   
   while(ejection.objectDistance(distanceUnits::mm) > 100 && !time_out) {}
 
