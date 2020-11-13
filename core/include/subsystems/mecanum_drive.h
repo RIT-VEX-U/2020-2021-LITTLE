@@ -41,7 +41,7 @@ class MecanumDrive
   /**
   * Create the Mecanum drivetrain object
   */
-  MecanumDrive(vex::motor &left_front, vex::motor &right_front, vex::motor &left_rear, vex::motor &right_rear, 
+  MecanumDrive(vex::motor_group &left_front, vex::motor_group &right_front, vex::motor &left_rear, vex::motor &right_rear, 
                vex::rotation *lateral_wheel=NULL, vex::inertial *imu=NULL, mecanumdrive_config_t *config=NULL);
 
   /**
@@ -94,7 +94,8 @@ class MecanumDrive
 
   private:
 
-  vex::motor &left_front, &right_front, &left_rear, &right_rear;
+  vex::motor_group &left_group, &right_front;
+  vex::motor &left_rear, &right_rear;
 
   mecanumdrive_config_t *config;
   vex::rotation *lateral_wheel;
