@@ -12,8 +12,8 @@ controller Hardware::partner(controllerType::partner);
 motor Hardware::lf1(PORT13, gearSetting::ratio36_1, true), Hardware::rf1(PORT20, gearSetting::ratio36_1),
       Hardware::lf2(PORT5, gearSetting::ratio36_1), Hardware::rf2(PORT6, gearSetting::ratio36_1, true),
       Hardware::lr(PORT12, gearSetting::ratio36_1, true), Hardware::rr(PORT19, gearSetting::ratio36_1);
-motor_group left_drive = (Hardware::lf1, Hardware::lf2);
-motor_group right_drive = (Hardware::rf1, Hardware::rf2);
+motor_group left_drive = motor_group(Hardware::lf1, Hardware::lf2);
+motor_group right_drive = motor_group(Hardware::rf1, Hardware::rf2);
 MecanumDrive Hardware::mec_drive(left_drive, right_drive, lr, rr);
 
 motor Hardware::intakeLeft(PORT15);

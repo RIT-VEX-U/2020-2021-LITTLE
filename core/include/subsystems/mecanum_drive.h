@@ -94,7 +94,7 @@ class MecanumDrive
 
   private:
 
-  vex::motor_group &left_group, &right_front;
+  vex::motor_group &left_front, &right_front;
   vex::motor &left_rear, &right_rear;
 
   mecanumdrive_config_t *config;
