@@ -110,6 +110,10 @@ void eject() {
 }
 
 void score() {
+  // move indexer out of the way
+  // TODO: Find actual value to replace "10"
+  indexer.spinTo(10, rotationUnits::rev);
+
   // rollers + flywheel spin in order to score
   bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
   top_roller.spin(directionType::fwd, 100, velocityUnits::pct);
@@ -121,6 +125,9 @@ void score() {
   flywheel.stop();
   bottom_roller.stop();
   top_roller.stop();
+
+  // TODO: Find actual value to replace "10"
+  indexer.spinTo(-10, rotationUnits::rev);
 }
 
 // -- OPTICAL SENSOR TESTING: TO BE REMOVED --

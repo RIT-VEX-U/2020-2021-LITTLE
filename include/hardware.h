@@ -38,6 +38,8 @@ extern motor bottom_roller;
 
 extern motor flywheel;
 
+extern motor indexer;
+
 // -- SENSORS --
 extern inertial inertia;
 extern optical optic;

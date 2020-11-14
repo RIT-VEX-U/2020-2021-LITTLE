@@ -23,6 +23,8 @@ motor Hardware::top_roller(PORT17, gearSetting::ratio6_1);
 
 motor Hardware::flywheel(PORT8, gearSetting::ratio6_1, true);
 
+motor Hardware::indexer(PORT14);
+
 // -- SENSORS --
 inertial Hardware::inertia(PORT16);
 optical Hardware::optic(PORT7);
