@@ -132,8 +132,7 @@ void eject() {
 void score() {
   front_running = true;
   // move indexer out of the way
-  // TODO: Find actual value to replace "10"
-  indexer.spinTo(-0.13, rotationUnits::rev);
+  indexer.spinTo(-0.25, rotationUnits::rev);
 
   // rollers + flywheel spin in order to score
   front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
@@ -149,8 +148,6 @@ void score() {
   bottom_roller.stop();
   top_roller.stop();
   front_running = false;
-
-  // TODO: Find actual value to replace "10"
   indexer.spinTo(0, rotationUnits::rev);
 
   if(num_balls > 0) num_balls--;
@@ -197,17 +194,26 @@ void OpControl::opcontrol()
   {
     mec_drive.drive(master.Axis3.position(), master.Axis4.position(), master.Axis1.position());
 
-    // -- TEMP OP CONTROL --
-    // NOTE: only front_rollers and intake are user-controlled, the other rollers
-    // are controlled by the limit switch and optical sensor inputs
+    // -- USER CONTROL --
     if(master.ButtonR2.pressing()) {
       front_rollers.spin(directionType::fwd, 50, velocityUnits::pct);
       intake.spin(directionType::fwd, 100, velocityUnits::pct);
+
+      // FLYWHEEL TESTING: TO BE REMOVED
+      // indexer.spinTo(-0.25, rotationUnits::rev);
+      // top_roller.spin(directionType::fwd, 50, velocityUnits::pct);
+      // bottom_roller.spin(directionType::rev, 50, velocityUnits::pct);
+      // flywheel.spin(directionType::fwd, 13, voltageUnits::volt);
     }
     else {
       intake.stop();
-
       if(!front_running) front_rollers.stop();
+
+      // FLYWHEEL TESTING: TO BE REMOVED
+      // top_roller.stop();
+      // bottom_roller.stop();
+      // flywheel.stop(brakeType::coast);
+      // indexer.spinTo(0, rotationUnits::rev);
     }
 
     // -- COLOR FILTERING --
