@@ -25,7 +25,7 @@ extern controller master;
 extern controller partner;
 
 // -- MOTORS --
-extern motor lf, rf, lr, rr;
+extern motor lf1, rf1, lf2, rf2, lr, rr;
 extern MecanumDrive mec_drive;
 
 extern motor intakeLeft;

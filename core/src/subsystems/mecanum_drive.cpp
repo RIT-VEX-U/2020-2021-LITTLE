@@ -3,7 +3,7 @@
 /**
 * Create the Mecanum drivetrain object
 */
-MecanumDrive::MecanumDrive(vex::motor &left_front, vex::motor &right_front, vex::motor &left_rear, vex::motor &right_rear, 
+MecanumDrive::MecanumDrive(vex::motor_group &left_front, vex::motor_group &right_front, vex::motor &left_rear, vex::motor &right_rear, 
                            vex::rotation *lateral_wheel, vex::inertial *imu, mecanumdrive_config_t *config)
 : left_front(left_front), right_front(right_front), left_rear(left_rear), right_rear(right_rear), // MOTOR CONFIG
   config(config), // CONFIG ...uh... config
