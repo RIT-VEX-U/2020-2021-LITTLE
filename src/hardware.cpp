@@ -24,7 +24,9 @@ motor Hardware::front_rollers(PORT10, gearSetting::ratio6_1);
 motor Hardware::bottom_roller(PORT18, gearSetting::ratio6_1);
 motor Hardware::top_roller(PORT17, gearSetting::ratio6_1);
 
-motor Hardware::flywheel(PORT8, gearSetting::ratio6_1, true);
+motor Hardware::flywheel_right(PORT8, gearSetting::ratio6_1, true);
+motor Hardware::flywheel_left(PORT2, gearSetting::ratio6_1);
+motor_group Hardware::flywheel(flywheel_right, flywheel_left);
 
 motor Hardware::indexer(PORT14);
 

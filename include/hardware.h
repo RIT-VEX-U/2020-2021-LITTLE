@@ -36,7 +36,9 @@ extern motor front_rollers;
 extern motor top_roller;
 extern motor bottom_roller;
 
-extern motor flywheel;
+extern motor flywheel_right;
+extern motor flywheel_left;
+extern motor_group flywheel;
 
 extern motor indexer;
 
