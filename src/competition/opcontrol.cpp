@@ -1,8 +1,24 @@
 #include "competition/opcontrol.h"
 #include <iostream>
+
 using namespace Hardware;
 
+// -- TESTING FUNCTIONS: TO BE REMOVED --
+
+/*
+ * Used for printing encoder values to the
+ * controller
+ */
+void printToController(float lf, float rr) {
+  master.Screen.clearScreen();
+  master.Screen.setCursor(1, 1);
+  master.Screen.print(lf);
+  master.Screen.setCursor(2, 1);
+  master.Screen.print(rr);
+}
+
 // -- TIME OUT --
+// WARNING: CURRENTLY BROKEN
 
 // Using a timer from the vex api, a task will determine whether or not a
 // specified amount of miliseconds has passed since a function began.
@@ -29,13 +45,12 @@ int timeOut() {
 
   // Note: may change to a thread so I can send this an arg for how much time
   // the function / loop can run. For now, the default is 500 ms
-  while(t.time(timeUnits::msec) < 500) {}
-
+  while(t.time() < 500) {}
   time_out = true;
   return 1;
 }
 
-// -- COLOR FILTERING --
+// -- OPTICAL SENSOR --
 
 // NOTE: The values that can be seen when running the optical sensor
 // directly through the brain are the values returned by the HUE()
@@ -44,35 +59,9 @@ int timeOut() {
 // ***ONLY hue() is to be used to retrieve "color" values from the
 // optical sensor
 
-// Color filtering has 2 modes:
-// Store Mode:
-//    The robot can hold 2 balls at once and will wait for user
-//    input before attempting to score or eject
-// Auto Mode: (typically used on goals)
-//    The robot will automatically eject or score a ball, depending
-//    on its color
-bool store_mode = true;
-
-// STORE MODE:
-
-// Keeps track of the colors of both stored balls (using vals from checkColorRange)
-int ball_hues[2];
-// Keeps track of how many balls are currently being stored
-int num_balls = 0;
-
-// BOTH MODES:
-
 // The current "hue" value that the optical sensor is returning
 // Will be continuously updated within its own task
 int curr_hue;
-
-void changeModes() {
-  store_mode = !store_mode;
-  const char *mode_msg = store_mode ? "STORE MODE" : "AUTO MODE";
-  master.Screen.clearScreen();
-  master.Screen.setCursor(1, 1);
-  master.Screen.print(mode_msg);
-}
 
 /* 
  * Taking the current "hue" value from the optical sensor
@@ -106,37 +95,26 @@ int checkColorRange(int hue_value) {
 // Note: The direction of the top roller determines whether the ball moves 
 // towards the flywheel or gets ejected
 
-bool front_running = false;
-
 void eject() {
-  front_running = true;
   // rollers spin in order to eject
   bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
   top_roller.spin(directionType::rev, 100, velocityUnits::pct);
-  front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
 
-  task time_out_task = task(&timeOut);
-  wait(10, timeUnits::msec);  // wait for time_out to be set to false again
+  //task time_out_task = task(&timeOut);
   
-  while(ejection.objectDistance(distanceUnits::mm) > 100 && !time_out) {}
+  // TODO: Find actual value to replace 100
+  while(ejection.objectDistance(distanceUnits::mm) > 100 /*&& !time_out*/) {}
 
-  front_rollers.stop();
   bottom_roller.stop();
   top_roller.stop();
-
-  front_running = false;
-
-  if(num_balls > 0) num_balls--;
 }
 
 void score() {
-  front_running = true;
   // move indexer out of the way
   // TODO: Find actual value to replace "10"
   indexer.spinTo(10, rotationUnits::rev);
 
   // rollers + flywheel spin in order to score
-  front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
   bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
   top_roller.spin(directionType::fwd, 100, velocityUnits::pct);
   flywheel.spin(directionType::fwd, 50, velocityUnits::pct);
@@ -144,30 +122,79 @@ void score() {
   // give the ball time to be scored
   // TODO: WILL BE REPLACED BY DISTANCE SENSOR
   wait(500, timeUnits::msec);
-  front_rollers.stop();
   flywheel.stop();
   bottom_roller.stop();
   top_roller.stop();
-  front_running = false;
 
   // TODO: Find actual value to replace "10"
   indexer.spinTo(-10, rotationUnits::rev);
 }
 
-  if(num_balls > 0) num_balls--;
-}
+// -- OPTICAL SENSOR TESTING: TO BE REMOVED --
 
-void ejectOrScore(int color_range) {
-  switch(color_range) {
-    // red
-    case 1:
-      score();
+// stores up to 20 hue values taken from the optic sensor
+int hues[40];
+// index that can currently be stored in
+int color_index = 0;
+
+/*
+ * Print the next value in the hues array to the controller
+ */
+void printNextColor() {
+  // check that color_index is not at the end of the array before incrementing
+  if(color_index < 39) color_index++;
+  master.Screen.clearScreen();
+  master.Screen.setCursor(1, 1);
+  master.Screen.print(color_index);
+  master.Screen.setCursor(2, 1);
+
+  int curr_hue = hues[color_index];
+  int hue_range = checkColorRange(curr_hue);
+
+  switch(hue_range) {
+    case 1: 
+      master.Screen.print("red");
       break;
-    // blue
     case 2:
-      eject();
+      master.Screen.print("blue");
+      break;
+    default:
+      master.Screen.print("no color detected");
       break;
   }
+
+  master.Screen.print(curr_hue);
+}
+
+/*
+ * Print the previous value in the hues array to the controller
+ */
+void printPrevColor() {
+  // check that color_index is not at the beginning of the array 
+  // before incrementing
+  if(color_index > 0) color_index--;
+  master.Screen.clearScreen();
+  master.Screen.setCursor(1, 1);
+  master.Screen.print(color_index);
+  master.Screen.setCursor(2, 1);
+
+  int curr_hue = hues[color_index];
+  int hue_range = checkColorRange(curr_hue);
+
+  switch(hue_range) {
+    case 1: 
+      master.Screen.print("red");
+      break;
+    case 2:
+      master.Screen.print("blue");
+      break;
+    default:
+      master.Screen.print("no color detected");
+      break;
+  }
+
+  master.Screen.setCursor(3, 1);
+  master.Screen.print(hues[color_index]);
 }
 
 /**
@@ -189,10 +216,6 @@ void OpControl::opcontrol()
   // Used for taken the average of the hues read
   int hue_total = 0, reads = 0;
 
-  master.ButtonL2.pressed(&eject);
-  master.ButtonL1.pressed(&score);
-  master.ButtonDown.pressed(&changeModes);
-
   // OpControl Loop
   while (true)
   {
@@ -206,9 +229,8 @@ void OpControl::opcontrol()
       intake.spin(directionType::fwd, 100, velocityUnits::pct);
     }
     else {
+      front_rollers.stop();
       intake.stop();
-
-      if(!front_running) front_rollers.stop();
     }
 
     // -- COLOR FILTERING --
@@ -221,12 +243,15 @@ void OpControl::opcontrol()
       int avg = hue_total / reads;
       int color_range = checkColorRange(avg);
 
-      if(store_mode) {
-        ball_hues[num_balls] = color_range;
-        num_balls++;
-      }
-      else {
-        ejectOrScore(color_range);
+      switch(color_range) {
+        // red
+        case 1:
+          score();
+          break;
+        // blue
+        case 2:
+          eject();
+          break;
       }
 
       // reset color filtering variables
@@ -235,4 +260,10 @@ void OpControl::opcontrol()
 
     vexDelay(10); // Small delay to allow time-sensitive functions to work properly.
   }
+
+  // -- OPTICAL SENSOR TESTING: TO BE REMOVED --
+  // optic_sample.stop();
+
+  // master.ButtonLeft.pressed(&printPrevColor);
+  // master.ButtonRight.pressed(&printNextColor);
 }
