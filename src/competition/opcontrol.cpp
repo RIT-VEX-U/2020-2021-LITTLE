@@ -133,7 +133,7 @@ void score() {
   front_running = true;
   // move indexer out of the way
   // TODO: Find actual value to replace "10"
-  indexer.spinTo(10, rotationUnits::rev);
+  indexer.spinTo(-0.13, rotationUnits::rev);
 
   // rollers + flywheel spin in order to score
   front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
@@ -151,8 +151,7 @@ void score() {
   front_running = false;
 
   // TODO: Find actual value to replace "10"
-  indexer.spinTo(-10, rotationUnits::rev);
-}
+  indexer.spinTo(0, rotationUnits::rev);
 
   if(num_balls > 0) num_balls--;
 }
