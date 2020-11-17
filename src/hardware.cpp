@@ -25,7 +25,7 @@ motor Hardware::bottom_roller(PORT18, gearSetting::ratio6_1);
 motor Hardware::top_roller(PORT17, gearSetting::ratio6_1);
 
 motor Hardware::flywheel_right(PORT8, gearSetting::ratio6_1, true);
-motor Hardware::flywheel_left(PORT2, gearSetting::ratio6_1);
+motor Hardware::flywheel_left(PORT6, gearSetting::ratio6_1);
 motor_group Hardware::flywheel(flywheel_right, flywheel_left);
 
 motor Hardware::indexer(PORT14);
@@ -37,6 +37,7 @@ optical Hardware::optic(PORT7);
 limit Hardware::limit_switch(Hardware::v5_brain.ThreeWirePort.C);
 rotation Hardware::enc_wheel(PORT11);
 // TODO: Find an actual port for this
-distance Hardware::ejection(PORT1);
+distance Hardware::ejection(PORT11);
+distance Hardware::scored(PORT1);
 
 // End Hardware Initialization

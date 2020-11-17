@@ -48,6 +48,7 @@ extern optical optic;
 extern limit limit_switch;
 extern rotation enc_wheel;
 extern distance ejection;
+extern distance scored;
 
 //End Hardware Declarations
 } // namespace Hardware

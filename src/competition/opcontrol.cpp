@@ -56,9 +56,9 @@ bool store_mode = true;
 // STORE MODE:
 
 // Keeps track of the colors of both stored balls (using vals from checkColorRange)
-int ball_hues[2];
+//int ball_hues[2];
 // Keeps track of how many balls are currently being stored
-int num_balls = 0;
+//int num_balls = 0;
 
 // BOTH MODES:
 
@@ -126,31 +126,31 @@ void eject() {
 
   front_running = false;
 
-  if(num_balls > 0) num_balls--;
+  //if(num_balls > 0) num_balls--;
 }
 
 void score() {
   front_running = true;
-  // move indexer out of the way
-  indexer.spinTo(-0.25, rotationUnits::rev);
 
   // rollers + flywheel spin in order to score
   front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
   bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
   top_roller.spin(directionType::fwd, 100, velocityUnits::pct);
-  flywheel.spin(directionType::fwd, 50, velocityUnits::pct);
+  //flywheel.spin(directionType::fwd, 50, velocityUnits::pct);
 
-  // give the ball time to be scored
-  // TODO: WILL BE REPLACED BY DISTANCE SENSOR
-  wait(500, timeUnits::msec);
+  task time_out_task = task(&timeOut);
+  wait(10, timeUnits::msec);  // wait for time_out to be set to false again
+
+  while(scored.objectDistance(distanceUnits::mm) > 100 && !time_out) {}
+
   front_rollers.stop();
-  flywheel.stop();
+  //flywheel.stop();
   bottom_roller.stop();
   top_roller.stop();
   front_running = false;
-  indexer.spinTo(0, rotationUnits::rev);
+  //indexer.spinTo(0, rotationUnits::rev);
 
-  if(num_balls > 0) num_balls--;
+  //if(num_balls > 0) num_balls--;
 }
 
 void ejectOrScore(int color_range) {
@@ -196,23 +196,35 @@ void OpControl::opcontrol()
 
     // -- USER CONTROL --
     if(master.ButtonR2.pressing()) {
+      // move indexer out of the way
+      if(!store_mode) {
+        flywheel.spin(directionType::fwd, 13, voltageUnits::volt);
+        indexer.spinTo(-0.25, rotationUnits::rev);
+      }
+
       front_rollers.spin(directionType::fwd, 50, velocityUnits::pct);
       intake.spin(directionType::fwd, 100, velocityUnits::pct);
-
+      
       // FLYWHEEL TESTING: TO BE REMOVED
       // indexer.spinTo(-0.25, rotationUnits::rev);
       // top_roller.spin(directionType::fwd, 50, velocityUnits::pct);
       // bottom_roller.spin(directionType::rev, 50, velocityUnits::pct);
-      // flywheel.spin(directionType::fwd, 13, voltageUnits::volt);
+       
     }
     else {
       intake.stop();
       if(!front_running) front_rollers.stop();
 
+      // move indexer back
+      if(!store_mode) {
+        indexer.spinTo(0, rotationUnits::rev);
+        flywheel.stop(brakeType::coast);
+      }
+
       // FLYWHEEL TESTING: TO BE REMOVED
       // top_roller.stop();
       // bottom_roller.stop();
-      // flywheel.stop(brakeType::coast);
+       
       // indexer.spinTo(0, rotationUnits::rev);
     }
 
@@ -226,11 +238,7 @@ void OpControl::opcontrol()
       int avg = hue_total / reads;
       int color_range = checkColorRange(avg);
 
-      if(store_mode) {
-        ball_hues[num_balls] = color_range;
-        num_balls++;
-      }
-      else {
+      if(!store_mode) {
         ejectOrScore(color_range);
       }
 
