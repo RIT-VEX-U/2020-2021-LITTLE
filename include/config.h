@@ -6,11 +6,16 @@
  * of creating Structs, and initializing their values at runtime in config.cpp
  * 
  */
+#include "core.h"
+
 namespace Config
 {
 
+
 // Declare configuration structs below
 // Form: extern [structName] [name];
+
+extern TankDrive::tankdrive_config_t drive_config;
 
 // End Config Declarations
 

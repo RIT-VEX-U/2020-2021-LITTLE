@@ -3,6 +3,7 @@
 
 #include "vex.h"
 #include "core.h"
+#include "config.h"
 
 using namespace vex;
 
@@ -21,34 +22,17 @@ namespace Hardware
 
 // -- BRAIN & CONTROLLER(S) --
 extern brain v5_brain;
-extern controller master;
-extern controller partner;
 
 // -- MOTORS --
-extern motor lf1, rf1, lf2, rf2, lr1, rr1, lr2, rr2;
-extern MecanumDrive mec_drive;
 
-extern motor intakeLeft;
-extern motor intakeRight;
-extern motor_group intake;
+extern motor left_front, left_rear, right_front, right_rear;
 
-extern motor front_rollers;
-extern motor top_roller;
-extern motor bottom_roller;
+extern motor_group left_group, right_group;
 
-extern motor flywheel_right;
-extern motor flywheel_left;
-extern motor_group flywheel;
-
-extern motor indexer;
+extern TankDrive drive_system;
 
 // -- SENSORS --
 extern inertial inertia;
-extern optical optic;
-extern limit limit_switch;
-extern rotation enc_wheel;
-extern distance ejection;
-extern distance scored;
 
 //End Hardware Declarations
 } // namespace Hardware

@@ -16,6 +16,4 @@ void Init::vexcodeInit(void)
   Config::initConfig();
 
   Hardware::v5_brain.Screen.print("Robot Code Initialized.");
-  Hardware::master.Screen.print("Controller Initialized.");
-  Hardware::partner.Screen.print("Controller Initialized.");
 }
