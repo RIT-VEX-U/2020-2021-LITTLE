@@ -1,4 +1,5 @@
 #include "../core/include/subsystems/tank_drive.h"
+#include <iostream>
 
 TankDrive::TankDrive(motor_group &left_motors, motor_group &right_motors, inertial &gyro_sensor, TankDrive::tankdrive_config_t &config)
     : config(config), left_motors(left_motors), right_motors(right_motors), drive_pid(config.drive_pid), turn_pid(config.turn_pid), gyro_sensor(gyro_sensor)
@@ -22,8 +23,8 @@ void TankDrive::stop()
  */
 void TankDrive::drive_tank(double left, double right)
 {
-  left_motors.setVelocity(left * 100, velocityUnits::pct);
-  right_motors.setVelocity(right * 100, velocityUnits::pct);
+  left_motors.spin(directionType::fwd, left * 100, velocityUnits::pct);
+  right_motors.spin(directionType::fwd, right * 100, velocityUnits::pct);
 }
 
 /**
