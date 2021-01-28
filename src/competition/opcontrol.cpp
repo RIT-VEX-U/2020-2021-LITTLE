@@ -153,6 +153,27 @@ void score() {
   //if(num_balls > 0) num_balls--;
 }
 
+void userScore() {
+  front_running = true;
+
+  // rollers + flywheel spin in order to score
+  flywheel.spin(directionType::fwd, 50, velocityUnits::pct);
+  indexer.spinTo(-0.15, rotationUnits::rev);
+
+  front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
+  bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
+  top_roller.spin(directionType::fwd, 100, velocityUnits::pct);
+
+  while(master.ButtonL1.pressing()) {}
+
+  front_rollers.stop();
+  flywheel.stop(brakeType::coast);
+  bottom_roller.stop();
+  top_roller.stop();
+  front_running = false;
+  indexer.spinTo(0, rotationUnits::rev);
+}
+
 void ejectOrScore(int color_range) {
   switch(color_range) {
     // red
@@ -186,47 +207,48 @@ void OpControl::opcontrol()
   int hue_total = 0, reads = 0;
 
   master.ButtonL2.pressed(&eject);
-  master.ButtonL1.pressed(&score);
+  master.ButtonL1.pressed(&userScore);
   master.ButtonDown.pressed(&changeModes);
+
+  bool reset_indexer = false;
 
   // OpControl Loop
   while (true)
   {
     //mec_drive.drive(master.Axis3.position(), master.Axis4.position(), master.Axis1.position());
-    tank_drive.drive_tank(master.Axis1.value() / 100, master.Axis3.value() / 100);
+    tank_drive.drive_tank(master.Axis3.position() / 100.0, master.Axis2.position() / 100.0);
 
     // -- USER CONTROL --
     if(master.ButtonR2.pressing()) {
-      // move indexer out of the way
       if(!store_mode) {
         flywheel.spin(directionType::fwd, 13, voltageUnits::volt);
-        indexer.spinTo(-0.25, rotationUnits::rev);
+
+        // move indexer out of the way
+        indexer.spin(directionType::fwd, 50, velocityUnits::pct);
+        wait(50, timeUnits::msec);
+        indexer.stop();
+        reset_indexer = true;
       }
 
       front_rollers.spin(directionType::fwd, 50, velocityUnits::pct);
       intake.spin(directionType::fwd, 100, velocityUnits::pct);
-      
-      // FLYWHEEL TESTING: TO BE REMOVED
-      // indexer.spinTo(-0.25, rotationUnits::rev);
-      // top_roller.spin(directionType::fwd, 50, velocityUnits::pct);
-      // bottom_roller.spin(directionType::rev, 50, velocityUnits::pct);
        
     }
     else {
       intake.stop();
       if(!front_running) front_rollers.stop();
 
-      // move indexer back
       if(!store_mode) {
-        indexer.spinTo(0, rotationUnits::rev);
+        // move indexer back
+        if(reset_indexer) {
+          indexer.spin(directionType::rev, 50, velocityUnits::pct);
+          wait(50, timeUnits::msec);
+          indexer.stop();
+          reset_indexer = false;
+        }
+
         flywheel.stop(brakeType::coast);
       }
-
-      // FLYWHEEL TESTING: TO BE REMOVED
-      // top_roller.stop();
-      // bottom_roller.stop();
-       
-      // indexer.spinTo(0, rotationUnits::rev);
     }
 
     // -- COLOR FILTERING --
