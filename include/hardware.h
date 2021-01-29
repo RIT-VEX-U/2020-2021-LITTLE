@@ -33,21 +33,14 @@ extern motor intakeRight;
 extern motor_group intake;
 
 extern motor front_rollers;
-extern motor top_roller;
-extern motor bottom_roller;
 
 extern motor flywheel_right;
 extern motor flywheel_left;
 extern motor_group flywheel;
 
-extern motor indexer;
-
 // -- SENSORS --
 extern inertial inertia;
-extern optical optic;
-extern limit limit_switch;
 extern rotation enc_wheel;
-extern distance ejection;
 extern distance scored;
 
 //End Hardware Declarations
