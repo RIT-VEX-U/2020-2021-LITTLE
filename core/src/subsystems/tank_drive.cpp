@@ -57,13 +57,14 @@ bool TankDrive::drive_forward(double inches, double percent_speed)
     drive_pid.reset();
 
     drive_pid.set_limits(-fabs(percent_speed), fabs(percent_speed));
-    drive_pid.set_target(inches);
+    // setting target to # revolutions the motor has to do
+    drive_pid.set_target(inches / (PI * config.wheel_diam));
 
     initialize_func = false;
   }
 
   // Update PID loop and drive the robot based on it's output
-  drive_pid.update(left_motors.position(rotationUnits::rev) * PI * config.wheel_diam);
+  drive_pid.update(left_motors.position(rotationUnits::rev) * 3);
   drive_tank(drive_pid.get(), drive_pid.get());
 
   // If the robot is at it's target, return true
