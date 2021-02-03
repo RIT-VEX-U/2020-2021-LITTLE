@@ -20,13 +20,15 @@ distance Hardware::scored(PORT1);
 motor Hardware::lf(PORT13, gearSetting::ratio36_1, true), Hardware::rf(PORT20, gearSetting::ratio36_1),
       Hardware::lr(PORT12, gearSetting::ratio36_1, true), Hardware::rr(PORT19, gearSetting::ratio36_1);
 
+//MecanumDrive Hardware::mec_drive(lf, rf, lr, rr);
+
 // WARNING: NOT TUNED! These are filler values
 TankDrive::tankdrive_config_t tank_config = {
   (PID::pid_config_t) {
     // p, i, d, f
-    0.5, 0, 0, 0,
+    0.5, 0.5, 0, 0,
     // deadband, on_target_time
-    0.5, 100
+    0.3, 100
   },
   (PID::pid_config_t) {
     // p, i, d, f
