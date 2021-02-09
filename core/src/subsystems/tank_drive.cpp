@@ -2,8 +2,18 @@
 #include <iostream>
 
 TankDrive::TankDrive(motor_group &left_motors, motor_group &right_motors, inertial &gyro_sensor, TankDrive::tankdrive_config_t &config)
-    : config(config), left_motors(left_motors), right_motors(right_motors), drive_pid(config.drive_pid), turn_pid(config.turn_pid), gyro_sensor(gyro_sensor)
+    : config(config), left_motors(left_motors), right_motors(right_motors), drive_pid(config.drive_pid), turn_pid(config.turn_pid)//, gyro_sensor(gyro_sensor)
 {
+  TankDrive::gyro_sensor = gyro_sensor;
+}
+
+int TankDrive::gyroSample() {
+  while(true) {
+    curr_rotation = gyro_sensor.rotation();
+    std::cout<< "rotation: " << curr_rotation << "\n";
+    wait(10, timeUnits::msec);
+  }
+  return 1;
 }
 
 /**
@@ -11,8 +21,8 @@ TankDrive::TankDrive(motor_group &left_motors, motor_group &right_motors, inerti
  */
 void TankDrive::stop()
 {
-  left_motors.stop();
-  right_motors.stop();
+  left_motors.stop(brakeType::brake);
+  right_motors.stop(brakeType::brake);
 }
 
 /**
@@ -58,14 +68,15 @@ bool TankDrive::drive_forward(double inches, double percent_speed)
 
     drive_pid.set_limits(-fabs(percent_speed), fabs(percent_speed));
     // setting target to # revolutions the motor has to do
-    drive_pid.set_target(inches / (PI * config.wheel_diam));
-
+    // the 3 is bc the wheel and motor have a 3:1 ratio
+    drive_pid.set_target(inches / (PI * config.wheel_diam * 3));
     initialize_func = false;
   }
 
   // Update PID loop and drive the robot based on it's output
-  drive_pid.update(left_motors.position(rotationUnits::rev) * 3);
+  drive_pid.update(left_motors.position(rotationUnits::rev));
   drive_tank(drive_pid.get(), drive_pid.get());
+  
 
   // If the robot is at it's target, return true
   if (drive_pid.is_on_target())
@@ -95,17 +106,20 @@ bool TankDrive::turn_degrees(double degrees, double percent_speed)
     turn_pid.set_limits(-fabs(percent_speed), fabs(percent_speed));
     turn_pid.set_target(degrees);
 
+    task gyro_sample = task(&TankDrive::gyroSample);
+
     initialize_func = false;
   }
 
   // Update PID loop and drive the robot based on it's output
-  turn_pid.update(gyro_sensor.rotation(rotationUnits::deg));
+  turn_pid.update(curr_rotation);
   drive_tank(turn_pid.get(), -turn_pid.get());
 
   // If the robot is at it's target, return true
   if (turn_pid.is_on_target())
   {
     drive_tank(0, 0);
+    gyro_sample.stop();
     initialize_func = true;
     return true;
   }
