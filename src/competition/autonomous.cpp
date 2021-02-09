@@ -1,8 +1,20 @@
 #include "competition/autonomous.h"
+#include <iostream>
 
 using namespace Hardware;
 
 // -- HELPER FUNCTIONS --
+
+// double curr_rotation;
+
+// int inertiaSample() {
+//   while(true) {
+//     curr_rotation = inertia.rotation();
+//     std::cout<< "rotation: " << curr_rotation << "\n";
+//     wait(10, timeUnits::msec);
+//   }
+//   return 1;
+// }
 
 void intake_ball() {
   intake.spin(directionType::fwd, 100, velocityUnits::pct);
@@ -36,11 +48,22 @@ void intake_ball() {
 void Auto::autonomous()
 {
   //Autonomous Init
-
+  inertia.calibrate();
+  while(inertia.isCalibrating()) {}
+  while(!tank_drive.drive_forward(30, 0.5)) {}
+  tank_drive.stop();
+  wait(500, timeUnits::msec);
+  while(!tank_drive.turn_degrees(90, 0.1)) {}
+  tank_drive.stop();
+  wait(500, timeUnits::msec);
+  while(!tank_drive.drive_forward(34, 0.5)) {}
+  tank_drive.stop();
+  wait(500, timeUnits::msec);
+  while(!tank_drive.turn_degrees(90, 0.1)) {}
+  tank_drive.stop();
   //Autonomous Loop
   while (true)
   {
-
     vexDelay(20); // Small delay to allow time-sensitive functions to work properly.
   }
 }

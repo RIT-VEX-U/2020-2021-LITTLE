@@ -1,4 +1,6 @@
 #include "competition/opcontrol.h"
+// AUTON TESTING: TO BE REMOVED
+#include "competition/autonomous.h"
 #include <iostream>
 using namespace Hardware;
 
@@ -192,6 +194,9 @@ void ejectOrScore(int color_range) {
  */
 void OpControl::opcontrol()
 {
+  
+  // AUTON TESTING: TO BE REMOVED
+  Auto::autonomous();
   // OpControl Init
 
   // optical sensor is more consistent when the led is on full power
@@ -211,6 +216,9 @@ void OpControl::opcontrol()
   master.ButtonDown.pressed(&changeModes);
 
   bool reset_indexer = false;
+
+  inertia.calibrate();
+  while(inertia.isCalibrating()) {}
 
   // OpControl Loop
   while (true)

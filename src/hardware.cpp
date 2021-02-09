@@ -26,15 +26,15 @@ motor Hardware::lf(PORT13, gearSetting::ratio36_1, true), Hardware::rf(PORT20, g
 TankDrive::tankdrive_config_t tank_config = {
   (PID::pid_config_t) {
     // p, i, d, f
-    0.5, 0.5, 0, 0,
+    1.0, 0, 0, 0,
     // deadband, on_target_time
-    0.3, 100
+    0.05, 0
   },
   (PID::pid_config_t) {
     // p, i, d, f
-    0.5, 0, 0, 0,
+    0.0055, 0, 0, 0.05,
     // deadband, on_target_time
-    0.5, 100
+    0.255, 0
   },
   4.0
 };
