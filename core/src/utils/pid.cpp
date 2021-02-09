@@ -19,12 +19,20 @@ void PID::update(double sensor_val)
 
   double time_delta = pid_timer.value() - last_time;
 
-  accum_error += time_delta * get_error();
+  double curr_err = get_error();
 
-  out = (config.f * target) + (config.p * get_error()) + (config.i * accum_error) + (config.d * (get_error() - last_error) / time_delta);
+  accum_error += time_delta * curr_err;
+
+  out = (config.f * target) + (config.p * curr_err) + (config.i * accum_error);
+  // DEBUGGING: WILL NEED TO BE COMBINED W/ LINE ABOVE
+  // Problem:
+  //    pid_timer.value() and last_time are getting identical values, resulting in
+  //    time_delta = 0. The division by 0 at the end results in out being NaN.
+  //
+  //+ (config.d * (curr_err - last_error) / time_delta);
 
   last_time = pid_timer.value();
-  last_error = get_error();
+  last_error = curr_err;
 
   if (lower_limit != 0 || upper_limit != 0)
     out = (out < lower_limit) ? lower_limit : (out > upper_limit) ? upper_limit : out;
@@ -92,7 +100,7 @@ bool PID::is_on_target()
       on_target_last_time = pid_timer.value();
       is_checking_on_target = true;
     }
-    else if (pid_timer.value() - on_target_last_time > config.on_target_time)
+    else if (pid_timer.value() - on_target_last_time >= config.on_target_time)
     {
       return true;
     }
