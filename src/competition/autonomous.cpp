@@ -19,7 +19,6 @@ using namespace Hardware;
 void intake_ball() {
   intake.spin(directionType::fwd, 100, velocityUnits::pct);
   front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
-  front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
   bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
   top_roller.spin(directionType::fwd, 100, velocityUnits::pct);
 
@@ -43,13 +42,9 @@ void intake_ball() {
 }
 
 /**
- * Code for the autonomous period is executed below.
+ * DRIVING TEST AUTO:
  */
-void Auto::autonomous()
-{
-  //Autonomous Init
-  inertia.calibrate();
-  while(inertia.isCalibrating()) {}
+void driveTest() {
   while(!tank_drive.drive_forward(30, 0.5)) {}
   tank_drive.stop();
   wait(500, timeUnits::msec);
@@ -61,9 +56,64 @@ void Auto::autonomous()
   wait(500, timeUnits::msec);
   while(!tank_drive.turn_degrees(90, 0.1)) {}
   tank_drive.stop();
-  //Autonomous Loop
-  while (true)
-  {
-    vexDelay(20); // Small delay to allow time-sensitive functions to work properly.
+}
+
+/**
+ * 
+ */
+void cycleCornerTower() {
+  while(!tank_drive.drive_forward(17, 0.5)) {
+    vexDelay(20);
   }
+  tank_drive.stop();
+  wait(100, timeUnits::msec);
+
+  while(!tank_drive.turn_degrees(-85, 0.1)) {
+    vexDelay(20);
+  }
+  tank_drive.stop();
+  wait(100, timeUnits::msec);
+
+  // prep for ball intake
+  intake.spin(directionType::fwd, 100, velocityUnits::pct);
+  front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
+
+  while(!tank_drive.drive_forward(25, 1.0)) {
+    vexDelay(20);
+  }
+  tank_drive.stop();
+  intake.stop();
+  front_rollers.stop();
+
+  while(!tank_drive.turn_degrees(-45, 0.1)) {
+    vexDelay(20);
+  }
+  tank_drive.stop();
+  wait(100, timeUnits::msec);
+
+  while(!tank_drive.drive_forward(22, 0.5)) {
+    vexDelay(20);
+  }
+  tank_drive.stop();
+  wait(100, timeUnits::msec);
+}
+
+/**
+ * Code for the autonomous period is executed below.
+ */
+void Auto::autonomous()
+{
+  //Autonomous Init
+  inertia.calibrate();
+  while(inertia.isCalibrating()) {}
+
+  cycleCornerTower();
+  
+  // Don't think I need a loop right now, maybe it will become less linear later...
+
+  // //Autonomous Loop
+  // while (true)
+  // {
+  //   vexDelay(20); // Small delay to allow time-sensitive functions to work properly.
+  // }
 }

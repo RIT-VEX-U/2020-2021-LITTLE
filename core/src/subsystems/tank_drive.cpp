@@ -68,15 +68,16 @@ bool TankDrive::drive_forward(double inches, double percent_speed)
 
     drive_pid.set_limits(-fabs(percent_speed), fabs(percent_speed));
     // setting target to # revolutions the motor has to do
-    // the 3 is bc the wheel and motor have a 3:1 ratio
     drive_pid.set_target(inches / (PI * config.wheel_diam * 3));
+
     initialize_func = false;
   }
 
   // Update PID loop and drive the robot based on it's output
   drive_pid.update(left_motors.position(rotationUnits::rev));
-  drive_tank(drive_pid.get(), drive_pid.get());
-  
+
+  double pid_out = drive_pid.get();
+  drive_tank(pid_out, pid_out);
 
   // If the robot is at it's target, return true
   if (drive_pid.is_on_target())
@@ -112,8 +113,11 @@ bool TankDrive::turn_degrees(double degrees, double percent_speed)
   }
 
   // Update PID loop and drive the robot based on it's output
+  double curr_rotation = gyro_sensor.rotation(rotationUnits::deg);
+  std::cout<< "curr rotation: " << curr_rotation << "\n";
   turn_pid.update(curr_rotation);
-  drive_tank(turn_pid.get(), -turn_pid.get());
+  double pid_out = turn_pid.get();
+  drive_tank(pid_out, -1 * pid_out);
 
   // If the robot is at it's target, return true
   if (turn_pid.is_on_target())
