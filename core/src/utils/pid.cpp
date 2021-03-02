@@ -21,21 +21,13 @@ void PID::update(double sensor_val)
 
   double curr_err = get_error();
 
-  out = (config.f * target) + (config.p * get_error());
+  out = (config.f * target) + (config.p * get_error()) + (config.i * accum_error) + (config.d * (get_error() - last_error) / time_delta);;
   
   // BUG: 
   // Timer updates too quickly leading to time_delta = 0
   // When it tries to divide by time_delta (0) at the end, the output becomes
   // not a number (NaN)
   //+ (config.i * accum_error) + (config.d * (get_error() - last_error) / time_delta);
-
-  out = (config.f * target) + (config.p * curr_err) + (config.i * accum_error);
-  // DEBUGGING: WILL NEED TO BE COMBINED W/ LINE ABOVE
-  // Problem:
-  //    pid_timer.value() and last_time are getting identical values, resulting in
-  //    time_delta = 0. The division by 0 at the end results in out being NaN.
-  //
-  //+ (config.d * (curr_err - last_error) / time_delta);
 
   last_time = pid_timer.value();
   last_error = curr_err;
