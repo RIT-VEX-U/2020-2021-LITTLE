@@ -1,16 +1,20 @@
 #include "../core/include/subsystems/tank_drive.h"
+#include "hardware.h"
 #include <iostream>
+
+inertial &TankDrive::gyro_sensor = Hardware::inertia;
+double TankDrive::curr_rotation = 0;
 
 TankDrive::TankDrive(motor_group &left_motors, motor_group &right_motors, inertial &gyro_sensor, TankDrive::tankdrive_config_t &config)
     : config(config), left_motors(left_motors), right_motors(right_motors), drive_pid(config.drive_pid), turn_pid(config.turn_pid)//, gyro_sensor(gyro_sensor)
 {
-  TankDrive::gyro_sensor = gyro_sensor;
+  //TankDrive::gyro_sensor = gyro_sensor;
 }
 
 int TankDrive::gyroSample() {
   while(true) {
     curr_rotation = gyro_sensor.rotation();
-    std::cout<< "rotation: " << curr_rotation << "\n";
+    //std::cout<< "rotation: " << curr_rotation << "\n";
     wait(10, timeUnits::msec);
   }
   return 1;
@@ -48,8 +52,8 @@ void TankDrive::drive_arcade(double forward_back, double left_right)
   double left = forward_back + left_right;
   double right = forward_back - left_right;
 
-  left_motors.setVelocity(left * 100, velocityUnits::pct);
-  right_motors.setVelocity(right * 100, velocityUnits::pct);
+  left_motors.spin(directionType::fwd, left * 100, velocityUnits::pct);
+  right_motors.spin(directionType::fwd, right * 100, velocityUnits::pct);
 }
 
 /**
@@ -113,8 +117,7 @@ bool TankDrive::turn_degrees(double degrees, double percent_speed)
   }
 
   // Update PID loop and drive the robot based on it's output
-  double curr_rotation = gyro_sensor.rotation(rotationUnits::deg);
-  std::cout<< "curr rotation: " << curr_rotation << "\n";
+  //double curr_rotation = gyro_sensor.rotation(rotationUnits::deg);
   turn_pid.update(curr_rotation);
   double pid_out = turn_pid.get();
   drive_tank(pid_out, -1 * pid_out);

@@ -40,7 +40,9 @@ extern motor_group flywheel;
 
 // -- SENSORS --
 extern inertial inertia;
-extern rotation enc_wheel;
+extern optical optic;
+extern limit limit_switch;
+extern distance ejection;
 extern distance scored;
 
 //End Hardware Declarations

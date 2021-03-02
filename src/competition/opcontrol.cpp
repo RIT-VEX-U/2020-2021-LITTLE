@@ -135,10 +135,11 @@ void score() {
   front_running = true;
 
   // rollers + flywheel spin in order to score
+  flywheel.spin(directionType::fwd, 50, velocityUnits::pct);
+  wait(100, timeUnits::msec);
   front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
   bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
   top_roller.spin(directionType::fwd, 100, velocityUnits::pct);
-  //flywheel.spin(directionType::fwd, 50, velocityUnits::pct);
 
   task time_out_task = task(&timeOut);
   wait(10, timeUnits::msec);  // wait for time_out to be set to false again
@@ -159,12 +160,12 @@ void userScore() {
   front_running = true;
 
   // rollers + flywheel spin in order to score
-  flywheel.spin(directionType::fwd, 50, velocityUnits::pct);
-  indexer.spinTo(-0.15, rotationUnits::rev);
+  flywheel.spin(directionType::fwd, 530, velocityUnits::rpm);
+  wait(800, timeUnits::msec);
 
   front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
   bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
-  top_roller.spin(directionType::fwd, 100, velocityUnits::pct);
+  top_roller.spin(directionType::fwd, 50, velocityUnits::pct);
 
   while(master.ButtonL1.pressing()) {}
 
@@ -173,7 +174,6 @@ void userScore() {
   bottom_roller.stop();
   top_roller.stop();
   front_running = false;
-  indexer.spinTo(0, rotationUnits::rev);
 }
 
 void ejectOrScore(int color_range) {
@@ -194,9 +194,7 @@ void ejectOrScore(int color_range) {
  */
 void OpControl::opcontrol()
 {
-  
-  // AUTON TESTING: TO BE REMOVED
-  Auto::autonomous();
+  // Auto::autonomous();
   // OpControl Init
 
   // optical sensor is more consistent when the led is on full power
@@ -211,31 +209,21 @@ void OpControl::opcontrol()
   // Used for taken the average of the hues read
   int hue_total = 0, reads = 0;
 
-  master.ButtonL2.pressed(&eject);
+  master.ButtonB.pressed(&eject);
   master.ButtonL1.pressed(&userScore);
   master.ButtonDown.pressed(&changeModes);
-
-  bool reset_indexer = false;
-
-  inertia.calibrate();
-  while(inertia.isCalibrating()) {}
 
   // OpControl Loop
   while (true)
   {
-    //mec_drive.drive(master.Axis3.position(), master.Axis4.position(), master.Axis1.position());
-    tank_drive.drive_tank(master.Axis3.position() / 100.0, master.Axis2.position() / 100.0);
-
     // -- USER CONTROL --
-    if(master.ButtonR2.pressing()) {
-      if(!store_mode) {
-        flywheel.spin(directionType::fwd, 13, voltageUnits::volt);
+    tank_drive.drive_tank(master.Axis3.position() / 100.0, master.Axis2.position() / 100.0);
+    //tank_drive.drive_arcade(master.Axis3.position() / 100.0, master.Axis1.position() / 100.0);
 
-        // move indexer out of the way
-        indexer.spin(directionType::fwd, 50, velocityUnits::pct);
-        wait(50, timeUnits::msec);
-        indexer.stop();
-        reset_indexer = true;
+    if(master.ButtonR1.pressing()) {
+      if(!store_mode) {
+        flywheel.spin(directionType::fwd, 530, velocityUnits::rpm);
+        wait(800, timeUnits::msec);
       }
 
       front_rollers.spin(directionType::fwd, 50, velocityUnits::pct);
@@ -244,17 +232,12 @@ void OpControl::opcontrol()
     }
     else {
       intake.stop();
-      if(!front_running) front_rollers.stop();
+      if(master.ButtonA.pressing()) {
+        front_rollers.spin(directionType::rev, 50, velocityUnits::pct);
+      }
+      else if(!front_running) front_rollers.stop();
 
       if(!store_mode) {
-        // move indexer back
-        if(reset_indexer) {
-          indexer.spin(directionType::rev, 50, velocityUnits::pct);
-          wait(50, timeUnits::msec);
-          indexer.stop();
-          reset_indexer = false;
-        }
-
         flywheel.stop(brakeType::coast);
       }
     }

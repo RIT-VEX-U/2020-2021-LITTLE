@@ -32,9 +32,9 @@ TankDrive::tankdrive_config_t tank_config = {
   },
   (PID::pid_config_t) {
     // p, i, d, f
-    0.0055, 0, 0, 0.05,
+    0.0055, 0.01, 0, 0,
     // deadband, on_target_time
-    0.255, 0
+    1.5, 0
   },
   4.0
 };
@@ -51,7 +51,5 @@ motor Hardware::front_rollers(PORT10, gearSetting::ratio6_1);
 motor Hardware::flywheel_right(PORT8, gearSetting::ratio6_1, true);
 motor Hardware::flywheel_left(PORT6, gearSetting::ratio6_1);
 motor_group Hardware::flywheel(flywheel_right, flywheel_left);
-
-motor Hardware::indexer(PORT14);
 
 // End Hardware Initialization
