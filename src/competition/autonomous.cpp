@@ -3,31 +3,10 @@
 
 using namespace Hardware;
 
-// -- HELPER FUNCTIONS --
-
-// double curr_rotation;
-
-// int inertiaSample() {
-//   while(true) {
-//     curr_rotation = inertia.rotation();
-//     std::cout<< "rotation: " << curr_rotation << "\n";
-//     wait(10, timeUnits::msec);
-//   }
-//   return 1;
-// }
-
 void intake_ball() {
   intake.spin(directionType::fwd, 100, velocityUnits::pct);
-  front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
   bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
   top_roller.spin(directionType::fwd, 100, velocityUnits::pct);
-
-  while(!limit_switch.pressing()) {
-    lf.spin(directionType::fwd, 50, velocityUnits::pct);
-    rf.spin(directionType::fwd, 50, velocityUnits::pct);
-    lr.spin(directionType::fwd, 50, velocityUnits::pct);
-    rr.spin(directionType::fwd, 50, velocityUnits::pct);
-  }
 
   lf.stop();
   rf.stop();
@@ -35,8 +14,6 @@ void intake_ball() {
   rr.stop();
 
   intake.stop();
-  front_rollers.stop();
-  front_rollers.stop();
   bottom_roller.stop();
   top_roller.stop();
 }
@@ -76,7 +53,6 @@ void scoreCornerTower() {
 
   // prep for ball intake
   intake.spin(directionType::fwd, 100, velocityUnits::pct);
-  front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
   bottom_roller.spin(directionType::rev, 50, velocityUnits::pct);
 
   // while(!tank_drive.drive_forward(25, 1.0)) {
@@ -87,7 +63,6 @@ void scoreCornerTower() {
     tank_drive.drive_tank(1.0, 1.0);
   }
   tank_drive.stop();
-  front_rollers.stop();
   bottom_roller.stop();
   wait(700, timeUnits::msec);
   intake.stop();
@@ -108,24 +83,15 @@ void scoreCornerTower() {
   tank_drive.stop();
   wait(100, timeUnits::msec);
 
-  flywheel.spin(directionType::fwd, 550, velocityUnits::rpm);
   inertia.resetRotation();
   tank_drive.drive_tank(0.25, 0.25);
   wait(800, timeUnits::msec);
   top_roller.spin(directionType::fwd, 100, velocityUnits::pct);
-  front_rollers.spin(directionType::fwd, 50, velocityUnits::pct);
   bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
   //intake.spin(directionType::fwd, 100, velocityUnits::pct);
 
-  wait(800, timeUnits::msec);
-  double flywheel_rpm = flywheel.velocity(velocityUnits::rpm);
-  std::cout<< "\nflywheel rpm: " << flywheel_rpm << std::endl;
-
-
-  flywheel.stop(brakeType::coast);
   tank_drive.stop();
   top_roller.stop();
-  front_rollers.stop();
   bottom_roller.stop();
   intake.stop();
 
@@ -135,7 +101,6 @@ void scoreCornerTower() {
   wait(100, timeUnits::msec);
 
   intake.spin(directionType::fwd, 100, velocityUnits::pct);
-  front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
   bottom_roller.spin(directionType::rev, 50, velocityUnits::pct);
   wait(500, timeUnits::msec);
   while(!tank_drive.drive_forward(-12, 0.5)) {
@@ -144,7 +109,6 @@ void scoreCornerTower() {
   }
 
   intake.stop();
-  front_rollers.stop();
   bottom_roller.stop();
   tank_drive.stop();
 
@@ -165,14 +129,12 @@ void scoreSideTower() {
 
   // prep for ball intake
   intake.spin(directionType::fwd, 100, velocityUnits::pct);
-  front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
   bottom_roller.spin(directionType::rev, 50, velocityUnits::pct);
 
   while(lf.rotation(rotationUnits::rev) < (27 / (PI * 4.0 * 3))) {
     tank_drive.drive_tank(1.0, 1.0);
   }
   tank_drive.stop();
-  front_rollers.stop();
   bottom_roller.stop();
   wait(700, timeUnits::msec);
   intake.stop();
@@ -195,23 +157,15 @@ void scoreSideTower() {
   tank_drive.stop();
   wait(100, timeUnits::msec);
 
-  flywheel.spin(directionType::fwd, 550, velocityUnits::rpm);
   inertia.resetRotation();
   tank_drive.drive_tank(0.2, 0.2);
   wait(800, timeUnits::msec);
   top_roller.spin(directionType::fwd, 100, velocityUnits::pct);
-  front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
   bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
   //intake.spin(directionType::fwd, 100, velocityUnits::pct);
 
-  wait(400, timeUnits::msec);
-  double flywheel_rpm = flywheel.velocity(velocityUnits::rpm);
-  std::cout<< "\nflywheel rpm: " << flywheel_rpm << std::endl;
-
-  flywheel.stop(brakeType::coast);
   tank_drive.stop();
   top_roller.stop();
-  front_rollers.stop();
   bottom_roller.stop();
   intake.stop();
 
@@ -229,11 +183,9 @@ void scoreSideTower() {
 
   // prep next red + descore blue
   intake.spin(directionType::fwd, 100, velocityUnits::pct);
-  front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
   bottom_roller.spin(directionType::rev, 50, velocityUnits::pct);
   wait(500, timeUnits::msec);
   intake.stop();
-  front_rollers.stop();
   bottom_roller.stop();
 
   while(!tank_drive.drive_forward(-12, 0.5)) {
@@ -260,32 +212,24 @@ void scoreSideTower() {
   tank_drive.stop();
   wait(100, timeUnits::msec);
 
-  flywheel.spin(directionType::fwd, 550, velocityUnits::rpm);
   inertia.resetRotation();
   tank_drive.drive_tank(0.2, 0.2);
   wait(800, timeUnits::msec);
   top_roller.spin(directionType::fwd, 100, velocityUnits::pct);
-  front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
   bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
   //intake.spin(directionType::fwd, 100, velocityUnits::pct);
 
   wait(400, timeUnits::msec);
-  flywheel_rpm = flywheel.velocity(velocityUnits::rpm);
-  std::cout<< "\nflywheel rpm: " << flywheel_rpm << std::endl;
 
-  flywheel.stop(brakeType::coast);
   tank_drive.stop();
   top_roller.stop();
-  front_rollers.stop();
   bottom_roller.stop();
   intake.stop();
 
   intake.spin(directionType::fwd, 100, velocityUnits::pct);
-  front_rollers.spin(directionType::fwd, 100, velocityUnits::pct);
   bottom_roller.spin(directionType::rev, 50, velocityUnits::pct);
   wait(500, timeUnits::msec);
   intake.stop();
-  front_rollers.stop();
   bottom_roller.stop();
 
   while(!tank_drive.drive_forward(-12, 0.5)) {
@@ -301,18 +245,14 @@ void scoreSideTower() {
 void Auto::autonomous()
 {
   //Autonomous Init
-  front_rollers.spin(directionType::rev, 500, velocityUnits::rpm);
   intake.spin(directionType::rev, 200, velocityUnits::rpm);
   wait(500, timeUnits::msec);
-  front_rollers.stop();
   intake.stop();
 
 
   inertia.calibrate();
   while(inertia.isCalibrating()) {
-    flywheel.spin(directionType::fwd, 530, velocityUnits::rpm);
   }
-  flywheel.stop(brakeType::coast);
 
   scoreCornerTower();
   scoreSideTower();
