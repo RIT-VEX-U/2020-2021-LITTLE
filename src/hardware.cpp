@@ -10,15 +10,11 @@ controller Hardware::partner(controllerType::partner);
 
 // -- SENSORS --
 inertial Hardware::inertia(PORT16);
-optical Hardware::optic(PORT7);
-// TODO: If anyone finds a better way to use the 3 wire ports, PLEASE fix this :)
-limit Hardware::limit_switch(Hardware::v5_brain.ThreeWirePort.C);
-distance Hardware::ejection(PORT11);
-distance Hardware::scored(PORT1);
+distance Hardware::scored(PORT10);
 
 // -- MOTORS --
-motor Hardware::lf(PORT13, gearSetting::ratio36_1, true), Hardware::rf(PORT20, gearSetting::ratio36_1),
-      Hardware::lr(PORT12, gearSetting::ratio36_1, true), Hardware::rr(PORT19, gearSetting::ratio36_1);
+motor Hardware::lf(PORT14, gearSetting::ratio18_1), Hardware::rf(PORT18, gearSetting::ratio18_1, true),
+      Hardware::lr(PORT13, gearSetting::ratio18_1, true), Hardware::rr(PORT17, gearSetting::ratio18_1);
 
 //MecanumDrive Hardware::mec_drive(lf, rf, lr, rr);
 
@@ -36,22 +32,20 @@ TankDrive::tankdrive_config_t tank_config = {
     // deadband, on_target_time
     1.5, 0
   },
-  4.0
+  // wheel diam
+  3.0,
+  // wheel : motor ratio
+  1.6667
 };
 motor_group left_motors = {Hardware::lf, Hardware::lr};
 motor_group right_motors = {Hardware::rf, Hardware::rr};
 TankDrive Hardware::tank_drive(left_motors, right_motors, Hardware::inertia, tank_config);
 
-motor Hardware::intakeLeft(PORT15);
-motor Hardware::intakeRight(PORT9, true);
+motor Hardware::intakeLeft(PORT11);
+motor Hardware::intakeRight(PORT19, true);
 motor_group Hardware::intake(Hardware::intakeLeft, Hardware::intakeRight);
 
-motor Hardware::front_rollers(PORT10, gearSetting::ratio6_1);
-motor Hardware::bottom_roller(PORT18, gearSetting::ratio6_1);
-motor Hardware::top_roller(PORT17, gearSetting::ratio6_1);
-
-motor Hardware::flywheel_right(PORT8, gearSetting::ratio6_1, true);
-motor Hardware::flywheel_left(PORT6, gearSetting::ratio6_1);
-motor_group Hardware::flywheel(flywheel_right, flywheel_left);
+motor Hardware::bottom_roller(PORT12, gearSetting::ratio6_1);
+motor Hardware::top_roller(PORT15, gearSetting::ratio6_1);
 
 // End Hardware Initialization

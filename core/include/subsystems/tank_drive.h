@@ -18,6 +18,7 @@ public:
     PID::pid_config_t turn_pid;
 
     double wheel_diam;
+    double wheel_motor_ratio;
   };
 
   /**

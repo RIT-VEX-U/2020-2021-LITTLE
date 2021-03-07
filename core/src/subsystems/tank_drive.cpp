@@ -72,7 +72,7 @@ bool TankDrive::drive_forward(double inches, double percent_speed)
 
     drive_pid.set_limits(-fabs(percent_speed), fabs(percent_speed));
     // setting target to # revolutions the motor has to do
-    drive_pid.set_target(inches / (PI * config.wheel_diam * 3));
+    drive_pid.set_target(inches / (PI * config.wheel_diam * config.wheel_motor_ratio));
 
     initialize_func = false;
   }
