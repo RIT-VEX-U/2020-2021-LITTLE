@@ -37,6 +37,27 @@ int timeOut() {
 
 // flag to be used when bottom roller is running in other functions
 bool bottom_running = false;
+task check_indexer_task;
+
+int checkIndexer() {
+  bottom_running = true;
+
+  while(indexer.objectDistance(distanceUnits::mm) > 50) {}
+  bottom_roller.stop(brakeType::brake);
+
+  bottom_running = false;
+  return 0;
+}
+
+void startIndexerChecking() {
+  check_indexer_task = task(&checkIndexer);
+  wait(10, timeUnits::msec);
+}
+
+void endIndexerChecking() {
+  check_indexer_task.stop();
+  wait(20, timeUnits::msec);
+}
 
 /*
  * Initially used for color sorting, will probably be removed soon
@@ -48,8 +69,6 @@ void score() {
 
   task time_out_task = task(&timeOut);
   wait(10, timeUnits::msec);  // wait for time_out to be set to false again
-
-  while(scored.objectDistance(distanceUnits::mm) > 100 && !time_out) {}
 
   bottom_roller.stop();
   top_roller.stop();
@@ -87,11 +106,15 @@ void OpControl::opcontrol()
     tank_drive.drive_tank(master.Axis3.position() / 100.0, master.Axis2.position() / 100.0);
     //tank_drive.drive_arcade(master.Axis3.position() / 100.0, master.Axis1.position() / 100.0);
 
-    if(master.ButtonR1.pressing()) {
-      intake.spin(directionType::fwd, 13, voltageUnits::volt);
-      bottom_roller.spin(directionType::fwd, 5, voltageUnits::volt);
+    if(master.ButtonR1.pressing()) {  // intake
+      startIndexerChecking();
+      while(bottom_running && master.ButtonR1.pressing()) {
+        intake.spin(directionType::fwd, 13, voltageUnits::volt);
+        bottom_roller.spin(directionType::fwd, 5, voltageUnits::volt);
+      }
+      endIndexerChecking();
     }
-    else if(master.ButtonR2.pressing()) {
+    else if(master.ButtonR2.pressing()) { // de-intake
       intake.spin(directionType::rev, 13, voltageUnits::volt);
       bottom_roller.spin(directionType::rev, 10, voltageUnits::volt);
     }
