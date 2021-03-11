@@ -10,7 +10,7 @@ controller Hardware::partner(controllerType::partner);
 
 // -- SENSORS --
 inertial Hardware::inertia(PORT16);
-distance Hardware::scored(PORT10);
+distance Hardware::indexer(PORT10);
 
 // -- MOTORS --
 motor Hardware::lf(PORT14, gearSetting::ratio18_1), Hardware::rf(PORT18, gearSetting::ratio18_1, true),
@@ -45,7 +45,9 @@ motor Hardware::intakeLeft(PORT11);
 motor Hardware::intakeRight(PORT19, true);
 motor_group Hardware::intake(Hardware::intakeLeft, Hardware::intakeRight);
 
-motor Hardware::bottom_roller(PORT12, gearSetting::ratio6_1);
+motor Hardware::bottom_roller1(PORT12, gearSetting::ratio6_1);
+motor Hardware::bottom_roller2(PORT1, gearSetting::ratio6_1);
+motor_group Hardware::bottom_roller(bottom_roller1, bottom_roller2);
 motor Hardware::top_roller(PORT15, gearSetting::ratio6_1);
 
 // End Hardware Initialization

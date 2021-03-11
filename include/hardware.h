@@ -33,12 +33,13 @@ extern motor intakeRight;
 extern motor_group intake;
 
 extern motor top_roller;
-extern motor bottom_roller;
+extern motor bottom_roller1;
+extern motor bottom_roller2;
+extern motor_group bottom_roller;
 
 // -- SENSORS --
 extern inertial inertia;
-// maxed out ~100 mm
-extern distance scored;
+extern distance indexer;
 
 //End Hardware Declarations
 } // namespace Hardware

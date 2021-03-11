@@ -19,18 +19,12 @@ void PID::update(double sensor_val)
 
   double time_delta = pid_timer.value() - last_time;
 
-  double curr_err = get_error();
+  accum_error += time_delta * get_error();
 
-  out = (config.f * target) + (config.p * get_error()) + (config.i * accum_error) + (config.d * (get_error() - last_error) / time_delta);;
-  
-  // BUG: 
-  // Timer updates too quickly leading to time_delta = 0
-  // When it tries to divide by time_delta (0) at the end, the output becomes
-  // not a number (NaN)
-  //+ (config.i * accum_error) + (config.d * (get_error() - last_error) / time_delta);
+  out = (config.f * target) + (config.p * get_error()) + (config.i * accum_error) + (config.d * (get_error() - last_error) / time_delta);
 
   last_time = pid_timer.value();
-  last_error = curr_err;
+  last_error = get_error();
 
   if (lower_limit != 0 || upper_limit != 0)
     out = (out < lower_limit) ? lower_limit : (out > upper_limit) ? upper_limit : out;
@@ -98,7 +92,7 @@ bool PID::is_on_target()
       on_target_last_time = pid_timer.value();
       is_checking_on_target = true;
     }
-    else if (pid_timer.value() - on_target_last_time >= config.on_target_time)
+    else if (pid_timer.value() - on_target_last_time > config.on_target_time)
     {
       return true;
     }
