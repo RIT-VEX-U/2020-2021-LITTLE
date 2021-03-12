@@ -97,7 +97,7 @@ void OpControl::opcontrol()
     double outputL = pow(lPower,7)/pow(127,6);
     double outputR = pow(rPower,7)/pow(127,6);
 
-    tank_drive.drive_tank(outputL, outputR, volt); //percentage of max output
+    tank_drive.drive_tank(outputL, outputR, volt); //
     //tank_drive.drive_arcade(master.Axis3.position() / 100.0, master.Axis1.position() / 100.0);
 
 
@@ -115,15 +115,16 @@ void OpControl::opcontrol()
 
     }else if(master.ButtonL1.pressing()) {
       intake.spin(directionType::fwd, 13, voltageUnits::volt);
-      bottom_roller.spin(directionType::fwd, -13, voltageUnits::volt);
+      bottom_roller.spin(directionType::fwd, 13, voltageUnits::volt);
       mid_roller.spin(directionType::fwd, 13, voltageUnits::volt);
       top_roller.spin(directionType::fwd, 13, voltageUnits::volt);
 
     }else {
       intake.stop();
+      bottom_roller.spin(directionType::fwd, 0, voltageUnits::volt);
+      mid_roller.spin(directionType::fwd, 0, voltageUnits::volt);
+      top_roller.spin(directionType::fwd, 0, voltageUnits::volt);
 
-      if(!bottom_running)
-        bottom_roller.stop();
     }
 
     vexDelay(10); // Small delay to allow time-sensitive functions to work properly.

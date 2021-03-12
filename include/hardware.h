@@ -35,6 +35,7 @@ extern motor_group intake;
 extern motor top_roller;
 extern motor mid_roller;
 extern motor bottom_roller;
+extern motor_group bottom_rollers;
 
 // -- SENSORS --
 extern inertial inertia;

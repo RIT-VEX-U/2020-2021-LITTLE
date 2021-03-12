@@ -63,7 +63,7 @@ bool SplinePath::run_path(Waypoint *point_list, int list_length)
   lout -= motion_profile.turn_p * heading_error;
   rout += motion_profile.turn_p * heading_error;
 
-  drive_system.drive_tank(lout, rout);
+  drive_system.drive_tank(lout, rout, velocityUnits::pct);
 
   if(left_follower->finished && right_follower->finished)
   {
