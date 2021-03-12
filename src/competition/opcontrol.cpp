@@ -2,6 +2,9 @@
 #include <iostream>
 using namespace Hardware;
 
+// flag to be used when bottom roller is running in other functions
+bool bottom_running = false;
+
 // -- TIME OUT --
 
 // Using a timer from the vex api, a task will determine whether or not a
@@ -35,10 +38,25 @@ int timeOut() {
   return 1;
 }
 
-// flag to be used when bottom roller is running in other functions
-bool bottom_running = false;
+
+// -- INDEXING --
+
+// Check if an object has reached a certain point in the robot's intake
+// system through looping in a task until the distance threshhold has
+// been met.
+// To use indexing, begin the task by calling:
+//    startIndexerChecking()
+// If the threshhold has not been met and you wish to break out of the loop, call:
+//    endIndexerChecking()
+
+// global ref to a task so it can be stopped anywhere in the file
 task check_indexer_task;
 
+/*
+ * Run as a task
+ * Continuously checks if an object is within 50mm of the distance sensor
+ * If there is an object there, stop the bottom rollers
+ */
 int checkIndexer() {
   bottom_running = true;
 
@@ -51,13 +69,19 @@ int checkIndexer() {
 
 void startIndexerChecking() {
   check_indexer_task = task(&checkIndexer);
+  // give bottom_running flag time to be set
   wait(10, timeUnits::msec);
 }
 
 void endIndexerChecking() {
   check_indexer_task.stop();
-  wait(20, timeUnits::msec);
+  bottom_running = false;
+  // give bottom_running flag time to be set
+  wait(10, timeUnits::msec);
 }
+
+
+// -- SCORING --
 
 /*
  * Initially used for color sorting, will probably be removed soon
@@ -95,28 +119,31 @@ void userScore() {
  */
 void OpControl::opcontrol()
 {
-  // Auto::autonomous();
   // OpControl Init
-  
   master.ButtonL1.pressed(&userScore);
 
   // OpControl Loop
   while (true)
   {
     tank_drive.drive_tank(master.Axis3.position() / 100.0, master.Axis2.position() / 100.0);
-    //tank_drive.drive_arcade(master.Axis3.position() / 100.0, master.Axis1.position() / 100.0);
 
-    if(master.ButtonR1.pressing()) {  // intake
+    // intake
+    if(master.ButtonR1.pressing()) {
+      // intakes are unaffected by indexing
       intake.spin(directionType::fwd, 13, voltageUnits::volt);
+
+      // indexing
       startIndexerChecking();
       while(bottom_running && master.ButtonR1.pressing()) {
+        // this is gross but I couldn't quickly think of a better way to keep driving while indexing :(
         tank_drive.drive_tank(master.Axis3.position() / 100.0, master.Axis2.position() / 100.0);
-        bottom_roller.spin(directionType::fwd, 5, voltageUnits::volt);
+        bottom_roller.spin(directionType::fwd, 13, voltageUnits::volt);
       }
       bottom_roller.stop();
       endIndexerChecking();
     }
-    else if(master.ButtonR2.pressing()) { // de-intake
+    // de-intake
+    else if(master.ButtonR2.pressing()) {
       intake.spin(directionType::rev, 13, voltageUnits::volt);
       bottom_roller.spin(directionType::rev, 10, voltageUnits::volt);
     }
