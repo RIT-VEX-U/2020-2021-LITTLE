@@ -107,11 +107,13 @@ void OpControl::opcontrol()
     //tank_drive.drive_arcade(master.Axis3.position() / 100.0, master.Axis1.position() / 100.0);
 
     if(master.ButtonR1.pressing()) {  // intake
+      intake.spin(directionType::fwd, 13, voltageUnits::volt);
       startIndexerChecking();
       while(bottom_running && master.ButtonR1.pressing()) {
-        intake.spin(directionType::fwd, 13, voltageUnits::volt);
+        tank_drive.drive_tank(master.Axis3.position() / 100.0, master.Axis2.position() / 100.0);
         bottom_roller.spin(directionType::fwd, 5, voltageUnits::volt);
       }
+      bottom_roller.stop();
       endIndexerChecking();
     }
     else if(master.ButtonR2.pressing()) { // de-intake
