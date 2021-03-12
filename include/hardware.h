@@ -25,7 +25,7 @@ extern controller master;
 extern controller partner;
 
 // -- MOTORS --
-extern motor lf, rf, lr, rr;
+extern motor lf, rf, lb, rb, r, l;
 extern TankDrive tank_drive;
 
 extern motor intakeLeft;
@@ -33,6 +33,7 @@ extern motor intakeRight;
 extern motor_group intake;
 
 extern motor top_roller;
+extern motor mid_roller;
 extern motor bottom_roller;
 
 // -- SENSORS --

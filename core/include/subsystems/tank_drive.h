@@ -39,7 +39,14 @@ public:
    * 
    * left_motors and right_motors are in "percent": -1.0 -> 1.0
    */
-  void drive_tank(double left, double right);
+  void drive_tank(double left, double right, velocityUnits r);
+  void drive_tank(double left, double right, voltageUnits v); //overloaded function with voltage control
+
+
+  /**
+   * Sets the voltage of to each side of the chassis respectively
+  */
+  //void driveVolt(double left, double right);
 
   /**
    * Drive the robot using arcade style controls. forward_back controls the linear motion,
@@ -50,12 +57,12 @@ public:
   void drive_arcade(double forward_back, double left_right);
 
   /**
-   * Autonomously drive the robot X inches forward (Negative for backwards), with a maximum speed
-   * of percent_speed (-1.0 -> 1.0).
+   * Autonomously drive the robot X inches forward (Negative for backwards), with a maximum input
+   * (-13, 13).
    * 
    * Uses a PID loop for it's control.
    */
-  bool drive_forward(double inches, double percent_speed);
+  bool drive_forward(double inches, double maxVoltage);
 
   /**
    * Autonomously turn the robot X degrees to the right (negative for left), with a maximum motor speed

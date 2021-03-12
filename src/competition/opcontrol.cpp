@@ -44,6 +44,7 @@ bool bottom_running = false;
 void score() {
   wait(100, timeUnits::msec);
   bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
+  mid_roller.spin(directionType::fwd, 100, velocityUnits::pct);
   top_roller.spin(directionType::fwd, 100, velocityUnits::pct);
 
   task time_out_task = task(&timeOut);
@@ -52,6 +53,7 @@ void score() {
   while(scored.objectDistance(distanceUnits::mm) > 100 && !time_out) {}
 
   bottom_roller.stop();
+  mid_roller.stop();
   top_roller.stop();
 }
 
@@ -61,13 +63,17 @@ void score() {
  */
 void userScore() {
   bottom_running = true;
+  
   bottom_roller.spin(directionType::fwd, 13, voltageUnits::volt);
+  mid_roller.spin(directionType::fwd, 13, voltageUnits::volt);
   top_roller.spin(directionType::fwd, 13, voltageUnits::volt);
 
   while(master.ButtonL1.pressing()) {}
 
   bottom_roller.stop();
+  mid_roller.stop();
   top_roller.stop();
+
   bottom_running = false;
 }
 
@@ -79,24 +85,43 @@ void OpControl::opcontrol()
   // Auto::autonomous();
   // OpControl Init
   
-  master.ButtonL1.pressed(&userScore);
+  //master.ButtonL1.pressed(&userScore);
 
   // OpControl Loop
   while (true)
   {
-    tank_drive.drive_tank(master.Axis3.position() / 100.0, master.Axis2.position() / 100.0);
+    int rPower  = master.Axis2.value();
+		int lPower  = master.Axis3.value();
+
+    //throttle user input –– dampened input value
+    double outputL = pow(lPower,9)/pow(127,8);
+    double outputR = pow(rPower,9)/pow(127,8);
+
+    tank_drive.drive_tank(outputL/127, outputR/127); //percentage of max output
     //tank_drive.drive_arcade(master.Axis3.position() / 100.0, master.Axis1.position() / 100.0);
 
-    if(master.ButtonR1.pressing()) {
+
+    if(master.ButtonR1.pressing()) { //intake
       intake.spin(directionType::fwd, 13, voltageUnits::volt);
-      bottom_roller.spin(directionType::fwd, 5, voltageUnits::volt);
-    }
-    else if(master.ButtonR2.pressing()) {
-      intake.spin(directionType::rev, 13, voltageUnits::volt);
-      bottom_roller.spin(directionType::rev, 10, voltageUnits::volt);
-    }
-    else {
+      bottom_roller.spin(directionType::fwd, 13, voltageUnits::volt);
+      mid_roller.spin(directionType::fwd, 13, voltageUnits::volt);
+      top_roller.spin(directionType::fwd, -13, voltageUnits::volt);
+
+    }else if(master.ButtonR2.pressing()) { //outtake
+      intake.spin(directionType::fwd, -13, voltageUnits::volt);
+      bottom_roller.spin(directionType::fwd, -13, voltageUnits::volt);
+      mid_roller.spin(directionType::fwd, -13, voltageUnits::volt);
+      top_roller.spin(directionType::fwd, -13, voltageUnits::volt);
+
+    }else if(master.ButtonL1.pressing()) {
+      intake.spin(directionType::fwd, 13, voltageUnits::volt);
+      bottom_roller.spin(directionType::fwd, -13, voltageUnits::volt);
+      mid_roller.spin(directionType::fwd, 13, voltageUnits::volt);
+      top_roller.spin(directionType::fwd, 13, voltageUnits::volt);
+
+    }else {
       intake.stop();
+
       if(!bottom_running)
         bottom_roller.stop();
     }

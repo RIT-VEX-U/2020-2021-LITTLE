@@ -13,8 +13,9 @@ inertial Hardware::inertia(PORT16);
 distance Hardware::scored(PORT10);
 
 // -- MOTORS --
-motor Hardware::lf(PORT14, gearSetting::ratio18_1), Hardware::rf(PORT18, gearSetting::ratio18_1, true),
-      Hardware::lr(PORT13, gearSetting::ratio18_1, true), Hardware::rr(PORT17, gearSetting::ratio18_1);
+motor Hardware::lf(PORT14, gearSetting::ratio6_1,false), Hardware::rf(PORT18, gearSetting::ratio6_1, true),
+      Hardware::lb(PORT13, gearSetting::ratio6_1, true), Hardware::rb(PORT17, gearSetting::ratio6_1, false),
+      Hardware::r(PORT9, gearSetting::ratio6_1, true), Hardware::l(PORT2, gearSetting::ratio6_1, false); //added motors
 
 //MecanumDrive Hardware::mec_drive(lf, rf, lr, rr);
 
@@ -33,12 +34,12 @@ TankDrive::tankdrive_config_t tank_config = {
     1.5, 0
   },
   // wheel diam
-  3.0,
+  3.25,
   // wheel : motor ratio
-  1.6667
+  3/5
 };
-motor_group left_motors = {Hardware::lf, Hardware::lr};
-motor_group right_motors = {Hardware::rf, Hardware::rr};
+motor_group left_motors = {Hardware::lf, Hardware::lb, Hardware::l};
+motor_group right_motors = {Hardware::lf, Hardware::rb, Hardware::r};
 TankDrive Hardware::tank_drive(left_motors, right_motors, Hardware::inertia, tank_config);
 
 motor Hardware::intakeLeft(PORT11);
@@ -46,6 +47,7 @@ motor Hardware::intakeRight(PORT19, true);
 motor_group Hardware::intake(Hardware::intakeLeft, Hardware::intakeRight);
 
 motor Hardware::bottom_roller(PORT12, gearSetting::ratio6_1);
+motor Hardware::mid_roller(PORT1, gearSetting::ratio6_1);
 motor Hardware::top_roller(PORT15, gearSetting::ratio6_1);
 
 // End Hardware Initialization

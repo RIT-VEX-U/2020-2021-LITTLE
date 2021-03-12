@@ -10,8 +10,8 @@ void intake_ball() {
 
   lf.stop();
   rf.stop();
-  lr.stop();
-  rr.stop();
+  lb.stop();
+  rb.stop();
 
   intake.stop();
   bottom_roller.stop();

@@ -34,11 +34,23 @@ void TankDrive::stop()
  * right_motors controls the right motors.
  * 
  * left_motors and right_motors are in "percent": -1.0 -> 1.0
+ * rpm and dps are acceptable units
  */
-void TankDrive::drive_tank(double left, double right)
+void TankDrive::drive_tank(double left, double right, velocityUnits r)
 {
-  left_motors.spin(directionType::fwd, left * 100, velocityUnits::pct);
-  right_motors.spin(directionType::fwd, right * 100, velocityUnits::pct);
+  left_motors.spin(directionType::fwd, left, r);
+  right_motors.spin(directionType::fwd, right, r);
+}
+
+/**
+*
+* Overloaded function that accepts direct voltage control
+* 
+*/
+void TankDrive::drive_tank(double left, double right, voltageUnits v)
+{
+  left_motors.spin(directionType::fwd, left, v);
+  right_motors.spin(directionType::fwd, right, v);
 }
 
 /**
@@ -57,20 +69,23 @@ void TankDrive::drive_arcade(double forward_back, double left_right)
 }
 
 /**
- * Autonomously drive the robot X inches forward (Negative for backwards), with a maximum speed
- * of percent_speed (-1.0 -> 1.0).
+ * Autonomously drive the robot X inches forward (Negative for backwards), with a maximum voltage
+ * of (-13 -> 13).
  * 
  * Uses a PID loop for it's control.
  */
-bool TankDrive::drive_forward(double inches, double percent_speed)
+bool TankDrive::drive_forward(double inches, double maxVoltage)
 {
+  float vMax = 13, accel = .3, vCap = 0; //slew
+  int sign;
   // On the first run of the funciton, reset the motor position and PID
   if (initialize_func)
   {
     left_motors.resetPosition();
+    right_motors.resetPosition();
     drive_pid.reset();
 
-    drive_pid.set_limits(-fabs(percent_speed), fabs(percent_speed));
+    drive_pid.set_limits(-maxVoltage, maxVoltage);
     // setting target to # revolutions the motor has to do
     drive_pid.set_target(inches / (PI * config.wheel_diam * config.wheel_motor_ratio));
 
@@ -78,15 +93,30 @@ bool TankDrive::drive_forward(double inches, double percent_speed)
   }
 
   // Update PID loop and drive the robot based on it's output
-  drive_pid.update(left_motors.position(rotationUnits::rev));
+  drive_pid.update((left_motors.position(rotationUnits::rev)+right_motors.position(rotationUnits::rev))/2); //get average position
+  double pid_out = drive_pid.get(); //get output
+  sign = pid_out/fabs(pid_out);
 
-  double pid_out = drive_pid.get();
-  drive_tank(pid_out, pid_out);
+    //slew rate
+      if(fabs(pid_out) > vMax)
+        pid_out = vMax*sign; //is the output greater than the absolute speed
+
+      vCap += accel*sign; //increase the temporary max velocity cap
+
+      if(fabs(vCap) > fabs(vMax)){
+        vCap = vMax*sign; //is the temporary max voltage greater than the absolute max?
+      }
+
+      if(fabs(pid_out) > fabs(vCap))
+        pid_out = vCap; //constrain to temporary max speed
+
+
+  drive_tank(pid_out + gyro_sensor.heading(), pid_out - gyro_sensor.heading(), volt); //output PID with straight line
 
   // If the robot is at it's target, return true
   if (drive_pid.is_on_target())
   {
-    drive_tank(0, 0);
+    drive_tank(0, 0, volt);
     initialize_func = true;
     return true;
   }
@@ -120,12 +150,12 @@ bool TankDrive::turn_degrees(double degrees, double percent_speed)
   //double curr_rotation = gyro_sensor.rotation(rotationUnits::deg);
   turn_pid.update(curr_rotation);
   double pid_out = turn_pid.get();
-  drive_tank(pid_out, -1 * pid_out);
+  drive_tank(pid_out, -1 * pid_out, velocityUnits::pct);
 
   // If the robot is at it's target, return true
   if (turn_pid.is_on_target())
   {
-    drive_tank(0, 0);
+    drive_tank(0, 0, volt);
     gyro_sample.stop();
     initialize_func = true;
     return true;
