@@ -14,7 +14,8 @@ distance Hardware::indexer(PORT10);
 
 // -- MOTORS --
 motor Hardware::lf(PORT14, gearSetting::ratio18_1), Hardware::rf(PORT18, gearSetting::ratio18_1, true),
-      Hardware::lr(PORT13, gearSetting::ratio18_1, true), Hardware::rr(PORT17, gearSetting::ratio18_1);
+      Hardware::lr(PORT13, gearSetting::ratio18_1, true), Hardware::lr2(PORT2, gearSetting::ratio18_1, true),
+      Hardware::rr(PORT17, gearSetting::ratio18_1), Hardware::rr2(PORT9, gearSetting::ratio18_1);
 
 //MecanumDrive Hardware::mec_drive(lf, rf, lr, rr);
 
@@ -37,8 +38,8 @@ TankDrive::tankdrive_config_t tank_config = {
   // wheel : motor ratio
   1.6667
 };
-motor_group left_motors = {Hardware::lf, Hardware::lr};
-motor_group right_motors = {Hardware::rf, Hardware::rr};
+motor_group left_motors = {Hardware::lf, Hardware::lr, Hardware::lr2};
+motor_group right_motors = {Hardware::rf, Hardware::rr, Hardware::rr2};
 TankDrive Hardware::tank_drive(left_motors, right_motors, Hardware::inertia, tank_config);
 
 motor Hardware::intakeLeft(PORT11);
