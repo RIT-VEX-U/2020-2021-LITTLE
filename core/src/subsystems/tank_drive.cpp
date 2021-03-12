@@ -76,7 +76,7 @@ void TankDrive::drive_arcade(double forward_back, double left_right)
  */
 bool TankDrive::drive_forward(double inches, double maxVoltage)
 {
-  float vMax = 13, accel = .3, vCap = 0; //slew
+  float vMax = 13, accel = .4, vCap = 0; //slew
   int sign;
   
   float prevAngle = gyro_sensor.heading(deg);
@@ -96,9 +96,9 @@ bool TankDrive::drive_forward(double inches, double maxVoltage)
   }
 
   // Update PID loop and drive the robot based on it's output
-  drive_pid.update((left_motors.position(rotationUnits::rev)+right_motors.position(rotationUnits::rev))/2); //get average position
+  drive_pid.update((left_motors.position(rotationUnits::rev)+right_motors.position(rotationUnits::rev))/4); //get average position
   double pid_out = drive_pid.get(); //get output
-  sign = pid_out/fabs(pid_out);
+  sign  = (pid_out > 0) ? 1 : -1;;
 
     //slew rate
       if(fabs(pid_out) > vMax)
@@ -117,6 +117,7 @@ bool TankDrive::drive_forward(double inches, double maxVoltage)
   std::cout << "p: "<< pid_out <<std::endl; //power output
   std::cout << "e: "<< drive_pid.get_error() <<std::endl; //error
   std::cout << "a: "<< gyro_sensor.heading(deg) <<std::endl; //angle
+  std::cout << "" <<std::endl; 
 
 
   drive_tank(pid_out + (gyro_sensor.heading(deg)-prevAngle), pid_out - (gyro_sensor.heading(deg)-prevAngle), volt); //output PID with straight line

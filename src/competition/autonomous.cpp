@@ -24,7 +24,8 @@ void intake_ball() {
 void driveTest() {
   //flipout
 
-  while(!tank_drive.drive_forward(10, 13)) {} //move forward at max speed
+  while(!tank_drive.drive_forward(10, 13)) {vexDelay(20);} //move forward at max speed
+  
   //while(!tank_drive.turn_degrees(90, 0.1)) {} 
   //while(!tank_drive.drive_forward(34, 0.5)) {
     //  intake.spin(directionType::fwd, 100, velocityUnits::pct); //intake ball
