@@ -94,10 +94,10 @@ void OpControl::opcontrol()
 		int lPower  = master.Axis3.value();
 
     //throttle user input –– dampened input value
-    double outputL = pow(lPower,9)/pow(127,8);
-    double outputR = pow(rPower,9)/pow(127,8);
+    double outputL = pow(lPower,7)/pow(127,6);
+    double outputR = pow(rPower,7)/pow(127,6);
 
-    tank_drive.drive_tank(outputL/127, outputR/127); //percentage of max output
+    tank_drive.drive_tank(outputL, outputR, volt); //percentage of max output
     //tank_drive.drive_arcade(master.Axis3.position() / 100.0, master.Axis1.position() / 100.0);
 
 

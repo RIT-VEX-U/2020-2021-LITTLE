@@ -78,6 +78,9 @@ bool TankDrive::drive_forward(double inches, double maxVoltage)
 {
   float vMax = 13, accel = .3, vCap = 0; //slew
   int sign;
+  
+  float prevAngle = gyro_sensor.heading(deg);
+
   // On the first run of the funciton, reset the motor position and PID
   if (initialize_func)
   {
@@ -110,8 +113,13 @@ bool TankDrive::drive_forward(double inches, double maxVoltage)
       if(fabs(pid_out) > fabs(vCap))
         pid_out = vCap; //constrain to temporary max speed
 
+  //debug
+  std::cout << "p: "<< pid_out <<std::endl; //power output
+  std::cout << "e: "<< drive_pid.get_error() <<std::endl; //error
+  std::cout << "a: "<< gyro_sensor.heading(deg) <<std::endl; //angle
 
-  drive_tank(pid_out + gyro_sensor.heading(), pid_out - gyro_sensor.heading(), volt); //output PID with straight line
+
+  drive_tank(pid_out + (gyro_sensor.heading(deg)-prevAngle), pid_out - (gyro_sensor.heading(deg)-prevAngle), volt); //output PID with straight line
 
   // If the robot is at it's target, return true
   if (drive_pid.is_on_target())
@@ -120,7 +128,7 @@ bool TankDrive::drive_forward(double inches, double maxVoltage)
     initialize_func = true;
     return true;
   }
-
+  
   return false;
 }
 

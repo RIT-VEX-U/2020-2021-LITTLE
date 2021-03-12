@@ -13,9 +13,9 @@ inertial Hardware::inertia(PORT16);
 distance Hardware::scored(PORT10);
 
 // -- MOTORS --
-motor Hardware::lf(PORT14, gearSetting::ratio6_1,false), Hardware::rf(PORT18, gearSetting::ratio6_1, true),
-      Hardware::lb(PORT13, gearSetting::ratio6_1, true), Hardware::rb(PORT17, gearSetting::ratio6_1, false),
-      Hardware::r(PORT9, gearSetting::ratio6_1, true), Hardware::l(PORT2, gearSetting::ratio6_1, false); //added motors
+motor Hardware::lf(PORT14, gearSetting::ratio6_1,false), Hardware::rf(PORT17, gearSetting::ratio6_1, false),
+      Hardware::lb(PORT13, gearSetting::ratio6_1, true), Hardware::rb(PORT18, gearSetting::ratio6_1, true),
+      Hardware::l(PORT2, gearSetting::ratio6_1, true), Hardware::r(PORT9, gearSetting::ratio6_1, false); //added motors
 
 //MecanumDrive Hardware::mec_drive(lf, rf, lr, rr);
 

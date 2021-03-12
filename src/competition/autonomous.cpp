@@ -22,24 +22,24 @@ void intake_ball() {
  * DRIVING TEST AUTO:
  */
 void driveTest() {
-  while(!tank_drive.drive_forward(30, 0.5)) {}
-  tank_drive.stop();
-  wait(500, timeUnits::msec);
-  while(!tank_drive.turn_degrees(90, 0.1)) {}
-  tank_drive.stop();
-  wait(500, timeUnits::msec);
-  while(!tank_drive.drive_forward(34, 0.5)) {}
-  tank_drive.stop();
-  wait(500, timeUnits::msec);
-  while(!tank_drive.turn_degrees(90, 0.1)) {}
-  tank_drive.stop();
+  //flipout
+
+  while(!tank_drive.drive_forward(10, 13)) {} //move forward at max speed
+  //while(!tank_drive.turn_degrees(90, 0.1)) {} 
+  //while(!tank_drive.drive_forward(34, 0.5)) {
+    //  intake.spin(directionType::fwd, 100, velocityUnits::pct); //intake ball
+ // }
+  //intake.stop();
+  //while(!tank_drive.turn_degrees(90, 0.1)) {}
+
 }
+
 
 /**
  * 
- */
+ 
 void scoreCornerTower() {
-  while(!tank_drive.drive_forward(15, 0.5)) {
+  while(!tank_drive.drive_forward(15, 0.5)){
     vexDelay(20);
   }
   tank_drive.stop();
@@ -60,7 +60,7 @@ void scoreCornerTower() {
   // }
 
   while(lf.rotation(rotationUnits::rev) < (27 / (PI * 4.0 * 3))) {
-    tank_drive.drive_tank(1.0, 1.0);
+    tank_drive.drive_tank(1.0, 1.0, volt);
   }
   tank_drive.stop();
   bottom_roller.stop();
@@ -84,7 +84,7 @@ void scoreCornerTower() {
   wait(100, timeUnits::msec);
 
   inertia.resetRotation();
-  tank_drive.drive_tank(0.25, 0.25);
+  tank_drive.drive_tank(0.25, 0.25, volt);
   wait(800, timeUnits::msec);
   top_roller.spin(directionType::fwd, 100, velocityUnits::pct);
   bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
@@ -158,7 +158,7 @@ void scoreSideTower() {
   wait(100, timeUnits::msec);
 
   inertia.resetRotation();
-  tank_drive.drive_tank(0.2, 0.2);
+  tank_drive.drive_tank(0.2, 0.2, volt);
   wait(800, timeUnits::msec);
   top_roller.spin(directionType::fwd, 100, velocityUnits::pct);
   bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
@@ -238,6 +238,10 @@ void scoreSideTower() {
   tank_drive.stop();
   wait(100, timeUnits::msec);
 }
+*/
+
+
+
 
 /**
  * Code for the autonomous period is executed below.
@@ -245,17 +249,18 @@ void scoreSideTower() {
 void Auto::autonomous()
 {
   //Autonomous Init
-  intake.spin(directionType::rev, 200, velocityUnits::rpm);
-  wait(500, timeUnits::msec);
-  intake.stop();
+  //intake.spin(directionType::rev, 200, velocityUnits::rpm);
+  //wait(500, timeUnits::msec);
+  //intake.stop();
 
 
   inertia.calibrate();
   while(inertia.isCalibrating()) {
   }
 
-  scoreCornerTower();
-  scoreSideTower();
+  //scoreCornerTower();
+  //scoreSideTower();
+  driveTest();
   // Don't think I need a loop right now, maybe it will become less linear later...
 
   // //Autonomous Loop
