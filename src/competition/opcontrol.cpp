@@ -119,6 +119,10 @@ void userScore() {
  */
 void OpControl::opcontrol()
 {
+  while(!tank_drive.turn_degrees(90, 1.0)) {
+    vexDelay(20);
+  }
+
   // OpControl Init
   master.ButtonL1.pressed(&userScore);
 

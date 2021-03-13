@@ -71,6 +71,9 @@ bool TankDrive::drive_forward(double inches, double percent_speed)
     drive_pid.reset();
 
     drive_pid.set_limits(-fabs(percent_speed), fabs(percent_speed));
+
+    std::cout << "target set: " << inches / (PI * config.wheel_diam * config.wheel_motor_ratio) << "\n" << std::flush;
+
     // setting target to # revolutions the motor has to do
     drive_pid.set_target(inches / (PI * config.wheel_diam * config.wheel_motor_ratio));
 
@@ -79,8 +82,12 @@ bool TankDrive::drive_forward(double inches, double percent_speed)
 
   // Update PID loop and drive the robot based on it's output
   drive_pid.update(left_motors.position(rotationUnits::rev));
+  std::cout << "update motor 1: " << Hardware::lf.position(rotationUnits::rev) << "\n" << std::flush;
+  std::cout << "update motor 2: " << Hardware::lr.position(rotationUnits::rev) << "\n" << std::flush;
+  std::cout << "update motor 3: " << Hardware::lr2.position(rotationUnits::rev) << "\n" << std::flush;
 
   double pid_out = drive_pid.get();
+  std::cout << "pid out: " << pid_out << "\n" << std::flush;
   drive_tank(pid_out, pid_out);
 
   // If the robot is at it's target, return true
@@ -90,6 +97,8 @@ bool TankDrive::drive_forward(double inches, double percent_speed)
     initialize_func = true;
     return true;
   }
+
+  std::cout << "\n";
 
   return false;
 }
@@ -119,7 +128,9 @@ bool TankDrive::turn_degrees(double degrees, double percent_speed)
   // Update PID loop and drive the robot based on it's output
   //double curr_rotation = gyro_sensor.rotation(rotationUnits::deg);
   turn_pid.update(curr_rotation);
+  std::cout << "current rotation: " << curr_rotation << "\n" << std::flush;
   double pid_out = turn_pid.get();
+  std::cout << "pid out: " << pid_out << "\n" << std::flush;
   drive_tank(pid_out, -1 * pid_out);
 
   // If the robot is at it's target, return true
