@@ -36,7 +36,7 @@ TankDrive::tankdrive_config_t tank_config = {
   // wheel diam
   3.25,
   // wheel : motor ratio
-  5.0/3.0
+  3.0/5.0
 };
 motor_group left_motors = {Hardware::lf, Hardware::lb, Hardware::l};
 motor_group right_motors = {Hardware::rf, Hardware::rb, Hardware::r};
@@ -50,7 +50,7 @@ motor Hardware::bottom_roller(PORT12, gearSetting::ratio6_1);
 motor Hardware::mid_roller(PORT1, gearSetting::ratio6_1);
 motor Hardware::top_roller(PORT15, gearSetting::ratio6_1);
 
-motor_group bottom_rollers(Hardware::bottom_roller, Hardware::mid_roller);
+motor_group Hardware::bottom_rollers(Hardware::bottom_roller, Hardware::mid_roller);
 
 
 // End Hardware Initialization

@@ -2,6 +2,8 @@
 #include "hardware.h"
 #include <iostream>
 
+using namespace Hardware;
+
 inertial &TankDrive::gyro_sensor = Hardware::inertia;
 double TankDrive::curr_rotation = 0;
 
@@ -74,29 +76,31 @@ void TankDrive::drive_arcade(double forward_back, double left_right)
  * 
  * Uses a PID loop for it's control.
  */
+float vMax, accel, vCap, prevAngle ; //slew
+int sign;
+  
+
 bool TankDrive::drive_forward(double inches, double maxVoltage)
 {
-  float vMax = 13, accel = 1, vCap = 0; //slew
-  int sign;
-  
-  float prevAngle = gyro_sensor.heading(deg);
 
   // On the first run of the funciton, reset the motor position and PID
   if (initialize_func)
   {
+    vMax = maxVoltage, accel = 1, vCap = 0; //slew
+    prevAngle = gyro_sensor.heading(deg);
     left_motors.resetPosition();
     right_motors.resetPosition();
     drive_pid.reset();
 
     drive_pid.set_limits(-maxVoltage, maxVoltage);
     // setting target to # revolutions the motor has to do
-    drive_pid.set_target((inches*(300)*config.wheel_motor_ratio)/(PI * config.wheel_diam));
+    drive_pid.set_target((inches/(PI * config.wheel_diam * config.wheel_motor_ratio)));
 
     initialize_func = false;
   }
 
   // Update PID loop and drive the robot based on it's output
-  drive_pid.update((left_motors.position(rotationUnits::rev)+right_motors.position(rotationUnits::rev))/6.0); //get average position
+  drive_pid.update(lf.position(rev)); //get average position
   double pid_out = drive_pid.get(); //get output
   sign  = (pid_out > 0) ? 1 : -1;;
 
@@ -114,14 +118,13 @@ bool TankDrive::drive_forward(double inches, double maxVoltage)
         pid_out = vCap; //constrain to temporary max speed
 
   //debug
-  std::cout << "p: "<< pid_out <<std::endl; //power output
+  std::cout << "p: "<< pid_out - (gyro_sensor.heading(deg)-prevAngle) <<std::endl; //power output
   std::cout << "e: "<< drive_pid.get_error() <<std::endl; //error
-  std::cout << "m: "<< (left_motors.position(rotationUnits::rev)+right_motors.position(rotationUnits::rev))/6.0 <<std::endl;
-  std::cout << "a: "<< gyro_sensor.heading(deg) <<std::endl; //angle
+  //std::cout << "a: "<< <<std::endl; //angle
   std::cout << "" <<std::endl; 
 
 
-  drive_tank(pid_out + (gyro_sensor.heading(deg)-prevAngle), pid_out - (gyro_sensor.heading(deg)-prevAngle), volt); //output PID with straight line
+  drive_tank(pid_out , pid_out, volt); //output PID with straight line
 
   // If the robot is at it's target, return true
   if (drive_pid.is_on_target())

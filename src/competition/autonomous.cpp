@@ -3,8 +3,6 @@
 
 using namespace Hardware;
 
-
-
 /**
  * DRIVING TEST AUTO:
  */
@@ -170,11 +168,12 @@ void Auto::autonomous()
   inertia.calibrate();
   while(inertia.isCalibrating()) {
   }
-
+  
   //FLIPOUT
 
   //intake first ball
   move(7, 13, 100);
+  wait(500000, msec);
   
   //turn to goal
   turnTo(-121.2,100, 100);
