@@ -8,7 +8,8 @@ using namespace Hardware;
  */
 void driveTest() {
 
-  while(!tank_drive.drive_forward(10, 13)) {vexDelay(20);} //test forward movement
+  while(!tank_drive.drive_forward(30, 13)) {vexDelay(20);} //test forward movement
+  wait(20000, msec);
   while(!tank_drive.turn_degrees(90, 1)) {vexDelay(20);}  //test turning 
 }
 
@@ -168,12 +169,11 @@ void Auto::autonomous()
   inertia.calibrate();
   while(inertia.isCalibrating()) {
   }
-  
+  driveTest();
   //FLIPOUT
 
   //intake first ball
   move(7, 13, 100);
-  wait(500000, msec);
   
   //turn to goal
   turnTo(-121.2,100, 100);

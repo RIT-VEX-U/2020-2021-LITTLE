@@ -86,7 +86,7 @@ bool TankDrive::drive_forward(double inches, double maxVoltage)
   // On the first run of the funciton, reset the motor position and PID
   if (initialize_func)
   {
-    vMax = maxVoltage, accel = 1, vCap = 0; //slew
+    vMax = maxVoltage, accel = .5, vCap = 0; //slew
     prevAngle = gyro_sensor.heading(deg);
     left_motors.resetPosition();
     right_motors.resetPosition();
@@ -94,13 +94,13 @@ bool TankDrive::drive_forward(double inches, double maxVoltage)
 
     drive_pid.set_limits(-maxVoltage, maxVoltage);
     // setting target to # revolutions the motor has to do
-    drive_pid.set_target((inches/(PI * config.wheel_diam * config.wheel_motor_ratio)));
+    drive_pid.set_target((inches*180*3)/((PI*config.wheel_diam*5)));
 
     initialize_func = false;
   }
 
   // Update PID loop and drive the robot based on it's output
-  drive_pid.update(lf.position(rev)); //get average position
+  drive_pid.update(lf.position(deg)); //get average position
   double pid_out = drive_pid.get(); //get output
   sign  = (pid_out > 0) ? 1 : -1;;
 

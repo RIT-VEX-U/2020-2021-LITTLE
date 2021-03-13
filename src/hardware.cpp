@@ -23,9 +23,9 @@ motor Hardware::lf(PORT14, gearSetting::ratio6_1,false), Hardware::rf(PORT17, ge
 TankDrive::tankdrive_config_t tank_config = {
   (PID::pid_config_t) {
     // p, i, d, f
-    10, 0, 0, 0,
+    .02, 0.00, 0.000, 0,
     // deadband, on_target_time
-    0.05, 0
+    10, 100
   },
   (PID::pid_config_t) {
     // p, i, d, f
