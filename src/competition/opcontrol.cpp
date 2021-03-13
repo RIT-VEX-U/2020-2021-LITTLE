@@ -97,7 +97,13 @@ void score() {
   bottom_roller.stop();
   top_roller.stop();
 }
-
+void deploy(){
+  bottom_roller.spin(reverse, 13, volt);
+  wait(350, msec);
+  bottom_roller.spin(fwd, 13, volt);
+  wait(250, msec);
+  bottom_roller.stop();
+}
 /*
  * Function called when scoring in user control
  * (also initially created for color sorting but this seems more useful)
@@ -119,7 +125,7 @@ void userScore() {
  */
 void OpControl::opcontrol()
 {
-
+  deploy();
   // OpControl Init
   master.ButtonL1.pressed(&userScore);
 

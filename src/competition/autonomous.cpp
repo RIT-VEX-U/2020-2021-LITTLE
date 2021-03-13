@@ -279,6 +279,7 @@ void Auto::autonomous()
   
   inertia.calibrate();
   while(inertia.isCalibrating()){}
+  
     deploy();
   
 
