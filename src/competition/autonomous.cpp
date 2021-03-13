@@ -39,8 +39,8 @@ void turnTo(float target, float percent, float waitTime){
 //controls how many revolutions each roller makes and at what speed [-600,600] rpm
 //BLOCKING Code
 void uptake(int top, int bottom, int speed){
-  bottom_roller.rotateFor(bottom, rev, speed, velocityUnits::rpm); //make 2 revolutions at max speed
-  top_roller.rotateFor(top, rev, speed, velocityUnits::rpm, true); 
+  bottom_roller.rotateFor(bottom, rev, speed, velocityUnits::pct); //make 2 revolutions at max speed
+  top_roller.rotateFor(top, rev, speed, velocityUnits::pct, true); 
 }
 
 void stopIntaking(){
@@ -64,7 +64,11 @@ void intake_ball(float percent){
 */
 
 void deploy(){
-
+  bottom_roller.spin(reverse, 13, volt);
+  wait(350, msec);
+  bottom_roller.spin(fwd, 13, volt);
+  wait(250, msec);
+  bottom_roller.stop();
 }
 
 /**
@@ -72,15 +76,17 @@ void deploy(){
 * the horizontal after
 */
 
+float offset = 6; //distance from the center of the robot to the center of the intakes
+
 void scoreCornerTower(){ //and turn onto horizontal
   //move towards goal 
-  move(35.47, 13, 100);
+  move(32, 13, 100);
 
   //Score ball –– don't use intakes
-  uptake(2,2, 600);  //make 2 revolutions at max speed
+  uptake(3,3, 100);  //make 4 revolutions at max speed
   
   //move back from goal 
-  move(-21.48, 13, 100); 
+  move(-21.48 + offset, 13, 100); 
 
   //turn to face horizontal line
   turnTo(121.2, 1.0, 100);
@@ -95,7 +101,8 @@ void scoreSideTowerHorizontal() {
   intake.spin(fwd, 13, volt);
 
   //move to ball and intake
-  move(55.256, 13, 100);
+  //move(55.256, 13, 100);
+  move(50, 13, 100);
   intake.spin(fwd, 0, volt);
 
   //turn to the goal
@@ -160,29 +167,208 @@ void scoreOppositeSideGoal(){ //starts at the start of the diagonal to ball
 
 }
 
+void shoot(){
+  //shoot ball into goal
+  bottom_roller.spin(fwd, 13, volt);
+  top_roller.spin(fwd, 13, volt);
+  wait(1000, msec);
+  bottom_roller.stop();
+  top_roller.stop();
+}
+void shootIndex(){
+  //int ballCount = 1;
+  int counter = 0;
+  //while(ballCount > 1){
+  
+while(1){
+    if(counter == 0){
+      top_roller.spin(fwd, 13, volt); //get the top roller up to speed
+      counter++;
+      wait(100, msec);
+    }
+    bottom_roller.spin(fwd, 13, volt); //shoot ball
 
+    if(indexer.objectDistance(mm) <= 20){ //if the ball exits
+      wait(250, msec); //wait until the ball fully exits
+      top_roller.spin(reverse, 13, volt);
+
+      intake.rotateFor(fwd, .2, rev, 100, velocityUnits::pct); //bring in 2nd ball
+      while(indexer.objectDistance(mm) > 200)
+        wait(10,msec); //spin the uptake until the 2nd ball reaches index 
+        break;
+    }
+    
+    wait(20,msec);
+  }
+  bottom_roller.rotateFor(reverse, .1, rev, 300, velocityUnits::rpm, false);
+  top_roller.rotateFor(reverse, 1, rev, 600, velocityUnits::rpm, false);
+}
+
+void index(){
+  int ballCount = 0;
+  while(ballCount < 1){
+    bottom_roller.spin(fwd, 8, volt);
+    top_roller.spin(fwd,-13,volt);
+    if(indexer.objectDistance(mm) <= 100){
+      ballCount++;
+      bottom_roller.spin(fwd, -10, volt);
+      wait(90, msec);
+      break;
+    }
+    wait(20, msec);
+  }
+  bottom_roller.spin(fwd, 0, volt);
+  top_roller.spin(fwd,0,volt);
+}
+
+void indexS(){
+   top_roller.spin(reverse, 10, volt);
+   //bool indexed = false;
+   bottom_roller1.setBrake(brake);
+   bottom_roller2.setBrake(brake);
+   top_roller.setBrake(brake);
+   //while(!indexed){
+   
+    //if there's a ball floating in the middle and in the intake
+    if(indexer.objectDistance(mm) > 140 && lowerIndexer.objectDistance(mm) < 50 && intakeIndexer.objectDistance(mm) < 80){ 
+      intake.rotateFor(reverse, .1, rev, 100,velocityUnits::pct, false); //get ball in away from intake
+      //while(lowerIndexer.objectDistance(mm) > 80)
+        //bottom_roller.spin(reverse, 13, volt); //drop ball down
+        
+      while(indexer.objectDistance(mm) > 150)
+        bottom_roller.spin(fwd, 12, volt); //bring ball back up
+
+       intake.rotateFor(fwd, .1, rev, 100,velocityUnits::pct, false); //get ball in away from intake
+        //indexed = true;
+       // break;
+    }
+
+    /*
+    //if there's only one ball at the top
+    if(indexer.objectDistance(mm) <= 65 && lowerIndexer.objectDistance(mm) > 20 && intakeIndexer.objectDistance(mm) > 80){ 
+      while(lowerIndexer.objectDistance(mm) > 20)
+        bottom_roller.spin(reverse, 10, volt); //drop ball down
+      while(indexer.objectDistance(mm) > 130)
+        bottom_roller.spin(fwd, 8, volt); //bring ball back up
+
+        indexed = true;
+        break;
+    }
+    
+    //if there's one ball floating in the middle
+    if(lowerIndexer.objectDistance(mm) < 20 && indexer.objectDistance(mm) > 100 && lowerIndexer.objectDistance(mm) > 90){
+      while(indexer.objectDistance(mm) > 130)
+        bottom_roller.spin(fwd, 8, volt); //bring ball back up
+
+        indexed = true;
+    }
+    */
+
+    //wait(20, msec);
+   //}
+  bottom_roller.spin(fwd, 0, volt);
+  top_roller.spin(fwd,0,volt);
+}
 /**
  * Code for the autonomous period is executed below.
  */
 void Auto::autonomous()
 {
+  intakeLeft.setBrake(brake);
+  intakeRight.setBrake(brake);
+  
   inertia.calibrate();
-  while(inertia.isCalibrating()) {
-  }
-  //FLIPOUT
+  while(inertia.isCalibrating()){}
+    deploy();
+  
 
+  //FLIPOUT
+//score corner tower
   //intake first ball
-  intake.spin(directionType::fwd, 13, volt);
-  move(9, 13, 100);
-  intake.stop();
+  intake.rotateFor(directionType::fwd, .6, rotationUnits::rev, false);
+  move(15, 13, 100);
   
   //turn to goal
-  turnTo(-121.2,1.0, 100);
+  turnTo(-118, 1.0, 100);
+  //move towards goal 
+  move(20, 13, 0);
+  move(4,7, 100);
 
+  //Score ball –– don't use intakes
+  shootIndex();
+
+  //move back from goal 
+  intake.spin(reverse, 13, volt);
+  move(-13, 13, 100); 
+  //turn to face horizontal line
+  intake.stop();
+  turnTo(121.5, .8, 100); 
+  
+
+//score side tower
+  //move to ball and intake
+  move(37, 13, 0);
+  intake.rotateFor(directionType::fwd, .6, rotationUnits::rev, false);
+  move(15, 6, 100);
+
+  //turn to the goal
+  turnTo(-90, 1.0, 100);
+  
+  //score ball into goal
+  move(5, 13,0);
+  move(3, 5, 100);
+  shootIndex();
+  wait(100, msec);
+  shoot();
+
+  //back away from goal 
+  intake.spin(reverse, 13, volt);
+  move(-19.35 + offset, 13, 100);
+  intake.stop();
+
+  //turn to diagonal ball and intake
+  turnTo(104, 1.0, 100);
+  move(30, 13, 0);
+  intake.rotateFor(directionType::fwd, 1, rotationUnits::rev, false); //intake ball
+  move(19, 6, 100);
+  move(-10, 13, 0); //back out to face goal
+
+
+//score corner goal
+  turnTo(-58, 1.0, 100);
+  //move to goal
+  move(21, 13, 0);
+  move(4, 5, 100);
+  shoot();
+
+  //backout
+  move(-34.47, 13, 100);
+  //index();
+
+  //turn to ball on diagonal and intake
+  turnTo(155, 1.0, 100);
+  move(15, 13, 0);
+  intake.rotateFor(directionType::fwd, 1, rotationUnits::rev, false);
+  move(17, 7, 100);
+  
+
+//score side goal
+  move(-8, 13, 0); //backout
+  turnTo(-110, 1, 100); //face goal
+
+  //score ball
+  move(30, 13, 0);
+  move(5, 5, 100);
+  shoot();
+
+
+
+  /*
   scoreCornerTower();
   scoreSideTowerHorizontal();
   scoreOppositeCorner();
   scoreOppositeSideGoal();
+
 
   //connect to mirrored part of route
   move(36, 13, 100);
@@ -192,7 +378,7 @@ void Auto::autonomous()
   scoreSideTowerHorizontal();
   scoreOppositeCorner();
   scoreOppositeSideGoal();
-
+  */
   //descore center goal and shoot ball
 
   
