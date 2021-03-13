@@ -97,7 +97,7 @@ void score() {
   bottom_roller.stop();
   top_roller.stop();
 }
-void deploy(){
+void user_deploy(){
   bottom_roller.spin(reverse, 13, volt);
   wait(350, msec);
   bottom_roller.spin(fwd, 13, volt);
@@ -125,7 +125,7 @@ void userScore() {
  */
 void OpControl::opcontrol()
 {
-  deploy();
+  user_deploy();
   // OpControl Init
   master.ButtonL1.pressed(&userScore);
 
