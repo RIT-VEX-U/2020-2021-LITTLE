@@ -11,6 +11,8 @@ controller Hardware::partner(controllerType::partner);
 // -- SENSORS --
 inertial Hardware::inertia(PORT16);
 distance Hardware::indexer(PORT10);
+distance Hardware::lowerIndexer(PORT6);
+distance Hardware::intakeIndexer(PORT5);
 
 // -- MOTORS --
 motor Hardware::lf(PORT14, gearSetting::ratio18_1), Hardware::rf(PORT18, gearSetting::ratio18_1, true),
@@ -23,7 +25,8 @@ motor Hardware::lf(PORT14, gearSetting::ratio18_1), Hardware::rf(PORT18, gearSet
 TankDrive::tankdrive_config_t tank_config = {
   (PID::pid_config_t) {
     // p, i, d, f
-    1.0, 0, 0, 0,
+    //1.0, 0, 0, 0,
+    .95, 0, 0, 0,
     // deadband, on_target_time
     0.05, 0
   },
@@ -32,6 +35,7 @@ TankDrive::tankdrive_config_t tank_config = {
     0.005, 0, 0, 0,
     // deadband, on_target_time
     1.5, 0
+  
   },
   // wheel diam
   3.25,
