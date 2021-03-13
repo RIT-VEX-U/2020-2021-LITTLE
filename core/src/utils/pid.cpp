@@ -1,4 +1,5 @@
 #include "../core/include/utils/pid.h"
+#include <iostream>
 
 /**
    * Create the PID object
@@ -18,6 +19,8 @@ void PID::update(double sensor_val)
   this->sensor_val = sensor_val;
 
   double time_delta = pid_timer.value() - last_time;
+
+  std::cout << "error: " << get_error() << "\n" << std::flush;
 
   accum_error += time_delta * get_error();
 

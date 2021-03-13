@@ -83,7 +83,7 @@ void scoreCornerTower(){ //and turn onto horizontal
   move(-21.48, 13, 100); 
 
   //turn to face horizontal line
-  turnTo(121.2, 100, 100);
+  turnTo(121.2, 1.0, 100);
 }
 
 /**
@@ -99,7 +99,7 @@ void scoreSideTowerHorizontal() {
   intake.spin(fwd, 0, volt);
 
   //turn to the goal
-  turnTo(-90, 100, 100);
+  turnTo(-90, 1.0, 100);
   
   //score ball into goal
   move(18.355, 13, 100);
@@ -109,7 +109,7 @@ void scoreSideTowerHorizontal() {
   move(-18.355, 13, 100);
 
   //turn to diagonal ball
-  turnTo(104, 100, 100);
+  turnTo(104, 1.0, 100);
 }
 
 /**
@@ -123,7 +123,7 @@ void scoreOppositeCorner(){
   intake.spin(fwd,0,volt);
 
   //turn to goal
-  turnTo(107.1, 100, 100);
+  turnTo(107.1, 1.0, 100);
 
   //move to goal
   move(35.473, 13, 100);
@@ -135,7 +135,7 @@ void scoreOppositeCorner(){
   move(-35.47, 13, 100);
 
   //turn to ball on diagonal
-  turnTo(177.5, 100, 100);
+  turnTo(177.5, 1.0, 100);
 }
 
 /**
@@ -148,7 +148,7 @@ void scoreOppositeSideGoal(){ //starts at the start of the diagonal to ball
   intake.spin(fwd, 0, volt);
 
   //turn to goal
-  turnTo(56.3, 100, 100);
+  turnTo(56.3, 1.0, 100);
 
   //move to goal and score
   move(42.355, 13, 100);
@@ -156,7 +156,7 @@ void scoreOppositeSideGoal(){ //starts at the start of the diagonal to ball
 
   //back out goal and turn to horizontal to connect to corner goals
   move(-18.355, 13, 100);
-  turnTo(90, 100, 100);
+  turnTo(90, 1.0, 100);
 
 }
 
@@ -169,14 +169,15 @@ void Auto::autonomous()
   inertia.calibrate();
   while(inertia.isCalibrating()) {
   }
-  driveTest();
   //FLIPOUT
 
   //intake first ball
-  move(7, 13, 100);
+  intake.spin(directionType::fwd, 13, volt);
+  move(9, 13, 100);
+  intake.stop();
   
   //turn to goal
-  turnTo(-121.2,100, 100);
+  turnTo(-121.2,1.0, 100);
 
   scoreCornerTower();
   scoreSideTowerHorizontal();
@@ -185,7 +186,7 @@ void Auto::autonomous()
 
   //connect to mirrored part of route
   move(36, 13, 100);
-  turnTo(-31.2, 100, 100);
+  turnTo(-31.2, 1.0, 100);
 
   scoreCornerTower();
   scoreSideTowerHorizontal();

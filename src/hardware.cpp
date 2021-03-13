@@ -29,12 +29,12 @@ TankDrive::tankdrive_config_t tank_config = {
   },
   (PID::pid_config_t) {
     // p, i, d, f
-    0.0055, 0.01, 0, 0,
+    0.0005, 0, 0, 0,
     // deadband, on_target_time
     1.5, 0
   },
   // wheel diam
-  3.0,
+  3.25,
   // wheel : motor ratio
   1.6667
 };
