@@ -31,7 +31,7 @@ void move(float target, float speed, float waitTime){ //"speed" is in volts
 }
 
 void turnTo(float target, float percent, float waitTime){
-  while(!tank_drive.turn_degrees(target, percent)){vexDelay(20);} //move towards goal 
+  while(!tank_drive.turn_degrees(target, 100)){vexDelay(20);} //move towards goal 
   tank_drive.stop();
   wait(waitTime, timeUnits::msec);
 }
