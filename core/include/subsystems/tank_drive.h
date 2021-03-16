@@ -18,12 +18,15 @@ public:
     PID::pid_config_t turn_pid;
 
     double wheel_diam;
+    double wheel_motor_ratio;
   };
 
   /**
    * Create the TankDrive object 
    */
   TankDrive(motor_group &left_motors, motor_group &right_motors, inertial &gyro_sensor, tankdrive_config_t &config);
+
+  static int gyroSample();
 
   /**
    * Stops rotation of all the motors using their "brake mode"
@@ -71,7 +74,12 @@ private:
   PID drive_pid;
   PID turn_pid;
 
-  inertial &gyro_sensor;
+  // it should be fine that these are static
+  // (shared amongst all instances of the class)
+  // bc there should only ever be one tank drive instance
+  static inertial &gyro_sensor;
+  static double curr_rotation;
+  task gyro_sample;
 
   bool initialize_func = true;
 };

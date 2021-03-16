@@ -25,23 +25,23 @@ extern controller master;
 extern controller partner;
 
 // -- MOTORS --
-extern motor lf1, rf1, lf2, rf2, lr1, rr1, lr2, rr2;
-extern MecanumDrive mec_drive;
+extern motor lf, rf, lr, lr2, rr, rr2;
+extern TankDrive tank_drive;
 
 extern motor intakeLeft;
 extern motor intakeRight;
 extern motor_group intake;
 
-extern motor front_rollers;
-
-extern motor flywheel_right;
-extern motor flywheel_left;
-extern motor_group flywheel;
+extern motor top_roller;
+extern motor bottom_roller1;
+extern motor bottom_roller2;
+extern motor_group bottom_roller;
 
 // -- SENSORS --
 extern inertial inertia;
-extern rotation enc_wheel;
-extern distance scored;
+extern distance indexer;
+extern distance lowerIndexer;
+extern distance intakeIndexer;
 
 //End Hardware Declarations
 } // namespace Hardware
