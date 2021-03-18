@@ -46,4 +46,10 @@ extern distance intakeIndexer;
 //End Hardware Declarations
 } // namespace Hardware
 
+void uptake(int top, int middle, int bottom);
+void uptakeRevolution(int top, int bottom, int speed);
+void stopIntaking();
+void deploy();
+void indexing();
+
 #endif

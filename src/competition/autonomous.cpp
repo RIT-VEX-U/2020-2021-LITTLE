@@ -36,40 +36,8 @@ void turnTo(float target, float percent, float waitTime){
   wait(waitTime, timeUnits::msec);
 }
 
-//controls how many revolutions each roller makes and at what speed [-600,600] rpm
-//BLOCKING Code
-void uptake(int top, int bottom, int speed){
-  bottom_roller.rotateFor(bottom, rev, speed, velocityUnits::pct); //make 2 revolutions at max speed
-  top_roller.rotateFor(top, rev, speed, velocityUnits::pct, true); 
-}
-
-void stopIntaking(){
-  intake.stop();
-  bottom_roller.stop();
-  top_roller.stop();
-}
-
-void intake_ball(float percent){
-  intake.spin(directionType::fwd, percent, velocityUnits::pct);
-  bottom_roller.spin(directionType::fwd, percent, velocityUnits::pct);
-  top_roller.spin(directionType::rev, percent, velocityUnits::pct);
-}
-
 
 //////////////////////////////////////////////////////////////////////
-
-/**
-* This sub function carries out the deployment and won't allow the run to continue
-* unless the robot has deployed
-*/
-
-void deploy(){
-  bottom_roller.spin(reverse, 13, volt);
-  wait(350, msec);
-  bottom_roller.spin(fwd, 13, volt);
-  wait(250, msec);
-  bottom_roller.stop();
-}
 
 /**
 * Assumes the robot is on diagonal ready to score and turns onto 
@@ -167,19 +135,15 @@ void scoreOppositeSideGoal(){ //starts at the start of the diagonal to ball
 
 }
 
-void shoot(){
-  //shoot ball into goal
-  bottom_roller.spin(fwd, 13, volt);
-  top_roller.spin(fwd, 13, volt);
-  wait(1000, msec);
-  bottom_roller.stop();
-  top_roller.stop();
-}
+
+timer shootDelay = timer();
+
 void shootIndex(){
   //int ballCount = 1;
   int counter = 0;
   //while(ballCount > 1){
-  
+  float prevTime = shootDelay.time(msec);
+
 while(1){
     if(counter == 0){
       top_roller.spin(fwd, 13, volt); //get the top roller up to speed
@@ -188,12 +152,12 @@ while(1){
     }
     bottom_roller.spin(fwd, 13, volt); //shoot ball
 
-    if(indexer.objectDistance(mm) <= 20){ //if the ball exits
+    if(indexer.objectDistance(mm) <= 20 || shootDelay.time() - prevTime > 2000){ //if the ball exits or timer passes
       wait(250, msec); //wait until the ball fully exits
       top_roller.spin(reverse, 13, volt);
 
-      intake.rotateFor(fwd, .2, rev, 100, velocityUnits::pct); //bring in 2nd ball
-      while(indexer.objectDistance(mm) > 200)
+      intake.rotateFor(fwd, .4, rev, 100, velocityUnits::pct); //bring in 2nd ball
+      while(indexer.objectDistance(mm) > 200 || shootDelay.time() - prevTime > 4000) //wait till ball shoots out or after 4 secs
         wait(10,msec); //spin the uptake until the 2nd ball reaches index 
         break;
     }
@@ -276,12 +240,18 @@ void Auto::autonomous()
 {
   intakeLeft.setBrake(brake);
   intakeRight.setBrake(brake);
+  lf.setBrake(brake);
+  lr.setBrake(brake);
+  lr2.setBrake(brake);
+  rf.setBrake(brake);
+  rr.setBrake(brake);
+  rr2.setBrake(brake);
   
   inertia.calibrate();
   while(inertia.isCalibrating()){}
-  
+
     deploy();
-  
+  wait(1000, msec);
 
   //FLIPOUT
 //score corner tower
@@ -319,8 +289,8 @@ void Auto::autonomous()
   move(5, 13,0);
   move(3, 5, 100);
   shootIndex();
-  wait(100, msec);
-  shoot();
+  wait(150, msec);
+  //shoot();
 
   //back away from goal 
   intake.spin(reverse, 13, volt);
@@ -328,7 +298,7 @@ void Auto::autonomous()
   intake.stop();
 
   //turn to diagonal ball and intake
-  turnTo(104, 1.0, 100);
+  turnTo(105, 1.0, 100);
   move(30, 13, 0);
   intake.rotateFor(directionType::fwd, 1, rotationUnits::rev, false); //intake ball
   move(19, 6, 100);
@@ -339,28 +309,28 @@ void Auto::autonomous()
   turnTo(-58, 1.0, 100);
   //move to goal
   move(21, 13, 0);
-  move(4, 5, 100);
-  shoot();
+  move(6, 5, 100);
+  shootIndex();
 
   //backout
   move(-34.47, 13, 100);
-  //index();
+  
 
   //turn to ball on diagonal and intake
   turnTo(155, 1.0, 100);
-  move(15, 13, 0);
-  intake.rotateFor(directionType::fwd, 1, rotationUnits::rev, false);
-  move(17, 7, 100);
+  move(14, 13, 0);
+  intake.rotateFor(directionType::fwd, 1.4, rotationUnits::rev, false);
+  move(18, 7, 100);
   
 
 //score side goal
-  move(-8, 13, 0); //backout
-  turnTo(-110, 1, 100); //face goal
+  move(-10, 13, 0); //backout
+  turnTo(-90, 1, 100); //face goal
 
   //score ball
   move(30, 13, 0);
   move(5, 5, 100);
-  shoot();
+  shootIndex();
 
 
 
