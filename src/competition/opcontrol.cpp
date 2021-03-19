@@ -4,18 +4,12 @@ using namespace Hardware;
 
 //INITIALIZE GLOBAL VARIABLES
 // -- tasks --
-vex::thread intakeTask, shootTask;
-vex::thread sensorStateTask, goalTask;
+vex::thread intakeTask, shootTask, stateTask;
 
-mutex mtx; //protect tasks
+mutex mtx; //protect threads
 
-int ballCounter = 0, goalLevel = 1, prevBallCount = 0;
-int* currentState = 0;
-bool bottomSensor = false, midSensor = false, topSensor = false;
-
-
-// flag to be used when bottom roller is running in other functions
-bool bottom_running = false;
+int ballCounter = 0, goalLevel = 1, prevBallCount = 0, currentState = 0; //track sensor states within file
+bool bottomSensor = false, midSensor = false, topSensor = false, bottom_running;
 
 // -- TIME OUT --
 
@@ -56,13 +50,10 @@ int timeOut() {
 /**
 * Continually get state of the balls in the robot
 */
-int sensorState(){
-  while(1){
-    mtx.unlock(); //protect multi thread calls
-
-    if(indexer.objectDistance(mm) < 120){ //is there a ball at the top?
+void updateSensorState(){
+    if(indexer.objectDistance(mm) < 120) //is there a ball at the top?
       topSensor = true;
-    }else
+    else
       topSensor = false;
 
     if(lowerIndexer.objectDistance(mm) < 120) //is there a ball in the middle?
@@ -78,19 +69,12 @@ int sensorState(){
     std::cout << "Top State: " << topSensor << std::endl;
     std::cout << "Mid State: " << midSensor << std::endl;
     std::cout << "Bottom State: " << bottomSensor << std::endl;
-
-      this_thread::sleep_for(20);
-
-      mtx.lock(); //ditto
-  }
-  return(0);
 }
 
 /**
 * Determine how many balls are in the robot
 */
-int getBallCount(){
-  while(1){
+void updateBallCount(){
     if(topSensor == true && midSensor == true && bottomSensor == true)
       ballCounter = 3;
     else if((topSensor == true && midSensor == true && bottomSensor == false) || (topSensor == false && midSensor == true && bottomSensor == true))
@@ -101,23 +85,16 @@ int getBallCount(){
       ballCounter = 1; //couldn't fit condition on previous line
     else
       ballCounter = 0;
-
-    this_thread::sleep_for(20);
-  }
-  return 0;
 }
 
 /**
 * Determine how many balls in the goal –– defaults to 1
 */
-int updateGoalLevel(){
-  while(1){
+void updateGoalLevel(){
     if(goalSensor.value() <= 100) //if there's 2 blue balls in the goal?
       goalLevel = 2;
     else 
       goalLevel = 1;
-  }
-  return(0);
 }
 
 /**
@@ -125,17 +102,21 @@ int updateGoalLevel(){
 */
 int getCurrentState(){
   while(1){
-  if(goalLevel == 2 && getBallCount() == 1) //while there's two balls in the goal and one in the robot
-    *currentState = 1;
+    updateSensorState(); //ditto
+    updateBallCount();
+    updateGoalLevel();
+
+  if(goalLevel == 2 && ballCounter == 1) //while there's two balls in the goal and one in the robot
+    currentState = 1;
   
-  if(goalLevel == 2 && getBallCount() == 2) //while there's two balls in the goal and two balls in the robot
-    *currentState = 2;
+  if(goalLevel == 2 && ballCounter == 2) //while there's two balls in the goal and two balls in the robot
+    currentState = 2;
   
-  if(goalLevel == 1  && getBallCount() == 1) //while there's one ball in the goal and one in the robot
-    *currentState = 3;
+  if(goalLevel == 1  && ballCounter == 1) //while there's one ball in the goal and one in the robot
+    currentState = 3;
   
-  if(goalLevel == 1  && getBallCount() == 2) //while there's one ball in the goal and two balls in the robot
-    *currentState = 4;
+  if(goalLevel == 1  && ballCounter == 2) //while there's one ball in the goal and two balls in the robot
+    currentState = 4;
     
     this_thread::sleep_for(20);
   }
@@ -149,8 +130,9 @@ int getCurrentState(){
 */
 int runIntake(){
   while(1){
+    mtx.unlock(); //prevent CPU confusion
 
-  if(master.ButtonR1.pressing()){ //is the button being pressed?
+   if(master.ButtonR1.pressing()){ //is the button being pressed?
     if(topSensor == false && bottomSensor == false){ //if there are no balls in the robot
       intake.spin(fwd, 13, volt);
       bottom_roller.spin(fwd, 13, volt); //run uptake until ball reaches the top roller
@@ -167,13 +149,14 @@ int runIntake(){
 }
 
 // -- SCORING --
-int shootBalls(int* currentState){
+int shootBalls(){
   while(1){
+    mtx.lock();
+
    if(master.ButtonL1.pressing()){ //only run if button is being pressed
 
-    prevBallCount = getBallCount(); //check to see if a ball was intaked/shot
+      switch(currentState){ //arg is global variable updated in seperate task
 
-      switch(*currentState){
        case 1: //descore two balls and shoot one 
          intake.rotateFor(2, rev, 100,velocityUnits::pct);
          bottom_roller2.rotateFor(2, rev, 100, velocityUnits::pct); //only spin mid roller and top
@@ -209,11 +192,11 @@ int shootBalls(int* currentState){
          bottom_roller2.rotateFor(2, rev, 100, velocityUnits::pct); //only spin mid roller and top
          top_roller.rotateFor(2, rev, 100, velocityUnits::pct, false); //wait until the ball gets shot out
 
+        break;
       }
-
-   this_thread::sleep_for(20);
-   }
- }
+      this_thread::sleep_for(20);
+    }
+  }
   return 0;
 }
 
@@ -261,10 +244,9 @@ void userScore() {
  void OpControl::opcontrol(){
   
   //allow tasks to run in background
-   sensorStateTask = thread(sensorState);
-   intakeTask = thread(runIntake);
-   goalTask = thread(getCurrentState); //continually update the state of the goals and robot
-   shootTask = thread(shootBalls(currentState)); //pass in a variable 
+   stateTask = thread(getCurrentState); //update sensors and state functions
+   intakeTask = thread(runIntake); 
+   shootTask = thread(shootBalls); 
   
      while(1){
      //allow other functions to run
