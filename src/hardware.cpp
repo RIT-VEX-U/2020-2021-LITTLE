@@ -13,6 +13,7 @@ inertial Hardware::inertia(PORT16);
 distance Hardware::indexer(PORT6);
 distance Hardware::lowerIndexer(PORT5);
 distance Hardware::intakeIndexer(PORT10);
+optical Hardware::goalSensor(PORT6);
 
 // -- MOTORS --
 motor Hardware::lf(PORT14, gearSetting::ratio18_1), Hardware::rf(PORT18, gearSetting::ratio18_1, true),
