@@ -42,7 +42,7 @@ extern inertial inertia;
 extern distance indexer;
 extern distance lowerIndexer;
 extern distance intakeIndexer;
-extern optical goalSensor;
+extern sonar goalSensor;
 
 //End Hardware Declarations
 } // namespace Hardware

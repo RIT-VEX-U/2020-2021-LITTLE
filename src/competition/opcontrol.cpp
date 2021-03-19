@@ -140,32 +140,46 @@ int getCurrentState(){
 */
 void runIntake(){
    if(master.ButtonR1.pressing()){ //is the button being pressed?
+
     if(topSensor == false && bottomSensor == false){ //if there are no balls in the robot
-      intake.spin(fwd, 13, volt);
-      bottom_roller.spin(fwd, 13, volt); //run uptake until ball reaches the top roller
-    }else if (topSensor == true && midSensor == false) { // if there is a ball at the top
-      intake.spin(fwd, 13, volt);
-      bottom_roller1.spin(fwd, 13, volt); //run bottom roller until ball reaches desired state –– when both are true
-    }else
-      intake.spin(fwd, 13, volt); //otherwise, just run intakes
+       intake.spin(fwd, 13, volt);
+       bottom_roller.spin(fwd, 10, volt); //run uptake until ball reaches the top roller
+     }else if (topSensor == true && midSensor == false) { // if there is a ball at the top
+       intake.spin(fwd, 13, volt);
+       bottom_roller1.spin(fwd, 13, volt); //run bottom roller until ball reaches desired state –– when both are true
+     }else
+       intake.spin(fwd, 13, volt); //otherwise, just run intakes
+
+   }else if(master.ButtonL2.pressing()){ //regular outtake
+       intake.spin(reverse, 13, volt);
+       bottom_roller.spin(reverse, 13, volt);
+       top_roller.spin(reverse, 13, volt);
+      if(master.ButtonR2.pressing()){//if shift key is being pressed with the descore button–– center goal descore
+         bottom_roller.stop(brake);
+         top_roller.stop(brake);
+         intake.spin(reverse, 13, volt); //only outtake intakes
+       } 
+
+   }else{
+      bottom_roller.stop();
+      top_roller.stop();
+      intake.stop();
    }
 }
 
 // -- SCORING --
 void shootBalls(){
-   if(master.ButtonL1.pressing()){ //only run if button is being pressed
-
+   if(master.ButtonL1.pressing()){ //only run if button is being pressed 
       switch(currentState){ //arg is global variable updated in seperate task
 
-       case 1: //descore two balls and shoot one 
+        case 1: //descore two balls and shoot one 
          intake.rotateFor(2, rev, 100,velocityUnits::pct);
          bottom_roller2.rotateFor(2, rev, 100, velocityUnits::pct); //only spin mid roller and top
          top_roller.rotateFor(2, rev, 100, velocityUnits::pct);
          bottom_roller1.stop(brake); //don't bring up second ball until first ball gets shot –– threshold determines when ball gets shot
-
          break;
 
-       case 2: //descore two balls, shoot two
+        case 2: //descore two balls, shoot two
          bottom_roller1.stop(brake); //don't bring up second ball until first ball gets shot –– threshold determines when ball gets shot
          intake.rotateFor(2, rev, 100,velocityUnits::pct); //descore 1
          bottom_roller2.rotateFor(2, rev, 100, velocityUnits::pct); //only spin mid roller and top
@@ -175,7 +189,6 @@ void shootBalls(){
          bottom_roller1.rotateFor(1, rev, 100, velocityUnits::pct); //bring bottom ball up only
          bottom_roller2.rotateFor(2, rev, 100, velocityUnits::pct); //shoot bottom ball only
          top_roller.rotateFor(2, rev, 100, velocityUnits::pct, false); //wait until the ball gets shot out
-
          break;
 
         case 3: //descore one, shoot one
@@ -183,18 +196,16 @@ void shootBalls(){
          intake.rotateFor(2, rev, 100,velocityUnits::pct); //descore 1
          bottom_roller2.rotateFor(2, rev, 100, velocityUnits::pct); //only spin mid roller and top
          top_roller.rotateFor(2, rev, 100, velocityUnits::pct, false); //wait until the ball gets shot out
-
-          break;
+         break;
 
         case 4: //descore one, shoot two
          bottom_roller1.stop(brake); //don't bring up any other balls
          intake.rotateFor(2, rev, 100,velocityUnits::pct); //descore 1
          bottom_roller2.rotateFor(2, rev, 100, velocityUnits::pct); //only spin mid roller and top
          top_roller.rotateFor(2, rev, 100, velocityUnits::pct, false); //wait until the ball gets shot out
-
-        break;
+         break;
       }
-    }
+   }
 }
 
 
@@ -241,13 +252,14 @@ void userScore() {
  void OpControl::opcontrol(){
    //allow tasks to run in background
    stateTask = thread(getCurrentState); //update sensors and state functions  
-   driveTask = thread(move);
+   driveTask = thread(move); //allow chassis to move independent of everything
 
    while(1){
      //allow other functions to run
 
-     runIntake(); //run intaking and shooting on the same thread –– one function automatically takes priority
-     shootBalls();
+    //run intaking and shooting on the same thread –– one function automatically takes priority
+     runIntake(); //determines when to intake/outtake
+     shootBalls(); //determines how much to rotate rollers
 
      vexDelay(10);
    }
