@@ -4,9 +4,7 @@ using namespace Hardware;
 
 //INITIALIZE GLOBAL VARIABLES
 // -- tasks --
-vex::thread intakeTask, shootTask, stateTask;
-
-mutex mtx; //protect threads
+vex::thread stateTask, driveTask;
 
 int ballCounter = 0, goalLevel = 1, prevBallCount = 0, currentState = 0; //track sensor states within file
 bool bottomSensor = false, midSensor = false, topSensor = false, bottom_running;
@@ -42,6 +40,18 @@ int timeOut() {
 
   time_out = true;
   return 1;
+}
+
+// -- CHASSIS --
+/**
+* Control chassis
+*/
+int move(){
+  while(1){
+   tank_drive.drive_tank(master.Axis3.position() / 100.0, master.Axis2.position() / 100.0); //control chassis
+   this_thread::sleep_for(20);
+  }
+  return 0;
 }
 
 
@@ -128,10 +138,7 @@ int getCurrentState(){
 /**
 * Intake function, automatically indexes balls based on states of sensor
 */
-int runIntake(){
-  while(1){
-    mtx.unlock(); //prevent CPU confusion
-
+void runIntake(){
    if(master.ButtonR1.pressing()){ //is the button being pressed?
     if(topSensor == false && bottomSensor == false){ //if there are no balls in the robot
       intake.spin(fwd, 13, volt);
@@ -142,17 +149,10 @@ int runIntake(){
     }else
       intake.spin(fwd, 13, volt); //otherwise, just run intakes
    }
-
-   this_thread::sleep_for(20);
-  }
-  return(0);
 }
 
 // -- SCORING --
-int shootBalls(){
-  while(1){
-    mtx.lock();
-
+void shootBalls(){
    if(master.ButtonL1.pressing()){ //only run if button is being pressed
 
       switch(currentState){ //arg is global variable updated in seperate task
@@ -194,10 +194,7 @@ int shootBalls(){
 
         break;
       }
-      this_thread::sleep_for(20);
     }
-  }
-  return 0;
 }
 
 
@@ -242,15 +239,15 @@ void userScore() {
  */
  
  void OpControl::opcontrol(){
-  
-  //allow tasks to run in background
-   stateTask = thread(getCurrentState); //update sensors and state functions
-   intakeTask = thread(runIntake); 
-   shootTask = thread(shootBalls); 
-  
-     while(1){
+   //allow tasks to run in background
+   stateTask = thread(getCurrentState); //update sensors and state functions  
+   driveTask = thread(move);
+
+   while(1){
      //allow other functions to run
-     tank_drive.drive_tank(master.Axis3.position() / 100.0, master.Axis2.position() / 100.0); //control chassis 
+
+     runIntake(); //run intaking and shooting on the same thread –– one function automatically takes priority
+     shootBalls();
 
      vexDelay(10);
    }
