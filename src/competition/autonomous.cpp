@@ -194,7 +194,7 @@ void indexS(){
    //while(!indexed){
    
     //if there's a ball floating in the middle and in the intake
-    if(indexer.objectDistance(mm) > 140 && lowerIndexer.objectDistance(mm) < 50 && intakeIndexer.objectDistance(mm) < 80){ 
+    if(indexer.objectDistance(mm) >  50 && intakeIndexer.value(mV) < 80){ 
       intake.rotateFor(reverse, .1, rev, 100,velocityUnits::pct, false); //get ball in away from intake
       //while(lowerIndexer.objectDistance(mm) > 80)
         //bottom_roller.spin(reverse, 13, volt); //drop ball down

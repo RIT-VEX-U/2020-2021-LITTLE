@@ -61,38 +61,38 @@ int move(){
 * Continually get state of the balls in the robot
 */
 void updateSensorState(){
-    if(indexer.objectDistance(mm) < 120) //is there a ball at the top?
+    if(indexer.objectDistance(mm) < 5) //is there a ball at the top?
       topSensor = true;
     else
       topSensor = false;
 
-    if(lowerIndexer.objectDistance(mm) < 120) //is there a ball in the middle?
+    //if(lowerIndexer.objectDistance(mm) < 50) //is there a ball in the middle?
+     if(lowerIndexer.pressing())
       midSensor = true;
     else
       midSensor = false;
 
-    if(intakeIndexer.objectDistance(mm) < 120) //is there a ball in the intakes?
+    if(intakeIndexer.value(mV) < 2500) //is there a ball in the intakes?
       bottomSensor = true;
     else
-      midSensor = false;
+      bottomSensor = false;
 
-    std::cout << "Top State: " << topSensor << std::endl;
-    std::cout << "Mid State: " << midSensor << std::endl;
-    std::cout << "Bottom State: " << bottomSensor << std::endl;
+    //std::cout << "Top State: " << topSensor << std::endl;
+    //std::cout << "Mid State: " << midSensor << std::endl;
+    //std::cout << "Bottom State: " << bottomSensor << std::endl;
+    //std::cout << "" << std::endl;
 }
 
 /**
 * Determine how many balls are in the robot
 */
 void updateBallCount(){
-    if(topSensor == true && midSensor == true && bottomSensor == true)
+    if(topSensor && midSensor && bottomSensor)
       ballCounter = 3;
-    else if((topSensor == true && midSensor == true && bottomSensor == false) || (topSensor == false && midSensor == true && bottomSensor == true))
+    else if((topSensor && midSensor && !bottomSensor) || (!topSensor && midSensor && bottomSensor))
       ballCounter = 2;
-    else if((topSensor == true && midSensor == false && bottomSensor == false) || (topSensor == false && midSensor == true && bottomSensor == false))
+    else if((topSensor && !midSensor && !bottomSensor) || (!topSensor && midSensor && !bottomSensor)|| (!topSensor && !midSensor && bottomSensor))
       ballCounter = 1;
-    else if((topSensor == false && midSensor == false && bottomSensor == true))
-      ballCounter = 1; //couldn't fit condition on previous line
     else
       ballCounter = 0;
 }
@@ -101,7 +101,7 @@ void updateBallCount(){
 * Determine how many balls in the goal –– defaults to 1
 */
 void updateGoalLevel(){
-    if(goalSensor.value() <= 100) //if there's 2 blue balls in the goal?
+    if(goalSensor.objectDistance(mm) <= 110) //if there's 2 blue balls in the goal?
       goalLevel = 2;
     else 
       goalLevel = 1;
@@ -128,6 +128,8 @@ int getCurrentState(){
   if(goalLevel == 1  && ballCounter == 2) //while there's one ball in the goal and two balls in the robot
     currentState = 4;
     
+  std::cout << "current state: " << currentState <<std::endl;
+
     this_thread::sleep_for(20);
   }
 
@@ -143,13 +145,17 @@ void runIntake(){
 
     if(topSensor == false && bottomSensor == false){ //if there are no balls in the robot
        intake.spin(fwd, 13, volt);
-       bottom_roller.spin(fwd, 10, volt); //run uptake until ball reaches the top roller
+       bottom_roller1.spin(fwd, 8, volt); //run uptake until ball reaches the top roller
+       bottom_roller2.spin(fwd, 2, volt);
+       top_roller.spin(reverse, 13, volt);
      }else if (topSensor == true && midSensor == false) { // if there is a ball at the top
        intake.spin(fwd, 13, volt);
-       bottom_roller1.spin(fwd, 13, volt); //run bottom roller until ball reaches desired state –– when both are true
-     }else
+       bottom_roller1.spin(fwd, .5, volt); //run bottom roller until ball reaches desired state –– when both are true
+       top_roller.spin(reverse, 13, volt);
+     }else{
        intake.spin(fwd, 13, volt); //otherwise, just run intakes
-
+       bottom_roller.stop(brake);
+     }
    }else if(master.ButtonL2.pressing()){ //regular outtake
        intake.spin(reverse, 13, volt);
        bottom_roller.spin(reverse, 13, volt);
@@ -161,21 +167,91 @@ void runIntake(){
        } 
 
    }else{
-      bottom_roller.stop();
-      top_roller.stop();
+      bottom_roller.stop(brake);
+      top_roller.spin(reverse, 5, volt);
       intake.stop();
    }
 }
 
 // -- SCORING --
+/*
+ * Empirically determine how much each system has to spin
+ */
+ void shoot(int balls){
+   bool prevVal = topSensor, ballShot, ballExitFully;
+   int entryTime = t.time(msec);
+
+  for(int i = 0; i <= balls; i++){
+    ballShot = false, ballExitFully = false;
+    while(!(ballShot && ballExitFully)){ //run the uptake until a ball gets shot
+      if(t.time(msec) - entryTime > 1500) //if you get stuck shooting
+        break;
+
+       top_roller.spin(fwd, 13, volt);
+       bottom_roller2.spin(fwd, 13, volt);
+
+       if(topSensor != prevVal){
+          ballShot = true;
+          wait(500, msec);
+         ballExitFully = true;
+       }
+
+      wait(20, msec);
+    }
+    if( t.time(msec) - entryTime > 3000) //if you get stuck shooting
+        break;
+    //after ball gets shot
+    top_roller.spin(reverse, 8, volt);
+    bottom_roller2.stop();
+
+    if(i == 1){ //if there is a ball to be indexed 
+      while(!topSensor){
+        bottom_roller1.spin(fwd, 8, volt);
+        bottom_roller2.spin(fwd, 2, volt);
+        wait(20,msec);
+      }
+    }
+  }
+}
+
 void shootBalls(){
    if(master.ButtonL1.pressing()){ //only run if button is being pressed 
+
       switch(currentState){ //arg is global variable updated in seperate task
 
         case 1: //descore two balls and shoot one 
-         intake.rotateFor(2, rev, 100,velocityUnits::pct);
-         bottom_roller2.rotateFor(2, rev, 100, velocityUnits::pct); //only spin mid roller and top
-         top_roller.rotateFor(2, rev, 100, velocityUnits::pct);
+         intake.rotateFor(2, rev, 100,velocityUnits::pct, false); //descore 2
+         shoot(1);
+         break;
+
+        case 2: //descore two balls, shoot two
+         intake.rotateFor(2, rev, 100,velocityUnits::pct, false); //descore 2
+         shoot(2);
+         break;
+
+        case 3: //descore one, shoot one
+         intake.rotateFor(1, rev, 100,velocityUnits::pct, false); //descore 1
+         shoot(1);
+         break;
+
+        case 4: //descore one, shoot two
+         intake.rotateFor(1, rev, 100,velocityUnits::pct, false); //descore 1
+         shoot(2);
+         break;
+      }
+   }
+}
+
+/*
+void shootBalls(){
+   if(master.ButtonL1.pressing()){ //only run if button is being pressed 
+
+      switch(currentState){ //arg is global variable updated in seperate task
+
+        case 1: //descore two balls and shoot one 
+         intake.spin(fwd,13,volt);
+         bottom_roller2.spin(fwd, 13, volt); //only spin mid roller and top
+         top_roller.spin(fwd, 13, volt);
          bottom_roller1.stop(brake); //don't bring up second ball until first ball gets shot –– threshold determines when ball gets shot
          break;
 
@@ -207,25 +283,10 @@ void shootBalls(){
       }
    }
 }
-
+*/
 
 //OLD CODE
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
- * Initially used for color sorting, will probably be removed soon -- OLD
- */
-void score() {
-  wait(100, timeUnits::msec);
-  bottom_roller.spin(directionType::fwd, 100, velocityUnits::pct);
-  top_roller.spin(directionType::fwd, 100, velocityUnits::pct);
-
-  task time_out_task = task(&timeOut);
-  wait(10, timeUnits::msec);  // wait for time_out to be set to false again
-
-  bottom_roller.stop();
-  top_roller.stop();
-}
-
 
 /*
  * Function called when scoring in user control
