@@ -66,7 +66,7 @@ void updateSensorState(){
     else
       topSensor = false;
 
-    //if(lowerIndexer.objectDistance(mm) < 50) //is there a ball in the middle?
+    //if(lowerIndexer.objectDistance(mm) < 50) //is there a ball in the middle? -- distance sensor broke RIP
      if(lowerIndexer.pressing())
       midSensor = true;
     else
@@ -150,7 +150,7 @@ void runIntake(){
        top_roller.spin(reverse, 13, volt);
      }else if (topSensor == true && midSensor == false) { // if there is a ball at the top
        intake.spin(fwd, 13, volt);
-       bottom_roller1.spin(fwd, .5, volt); //run bottom roller until ball reaches desired state –– when both are true
+       bottom_roller1.spin(fwd, .5, volt); //run bottom roller until ball reaches desired state 
        top_roller.spin(reverse, 13, volt);
      }else{
        intake.spin(fwd, 13, volt); //otherwise, just run intakes
@@ -175,9 +175,9 @@ void runIntake(){
 
 // -- SCORING --
 /*
- * Empirically determine how much each system has to spin
+ * shoots one ball at a time 
  */
- void shoot(int balls){
+ void shoot(int balls){ //how many balls will get shot
    bool prevVal = topSensor, ballShot, ballExitFully;
    int entryTime = t.time(msec);
 
@@ -191,7 +191,7 @@ void runIntake(){
        bottom_roller2.spin(fwd, 13, volt);
 
        if(topSensor != prevVal){
-          ballShot = true;
+          ballShot = true; //allow top ball to exit fully because sensor is placed lower than top roller
           wait(500, msec);
          ballExitFully = true;
        }
