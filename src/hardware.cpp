@@ -11,7 +11,7 @@ controller Hardware::partner(controllerType::partner);
 // -- SENSORS --
 inertial Hardware::inertia(PORT16);
 distance Hardware::indexer(PORT6);
-limit Hardware::lowerIndexer(Hardware::v5_brain.ThreeWirePort.B);
+distance Hardware::lowerIndexer(PORT5); //update port and sensor properly
 line Hardware::intakeIndexer(Hardware::v5_brain.ThreeWirePort.A);
 distance Hardware::goalSensor(PORT10);
 
@@ -57,109 +57,6 @@ motor_group Hardware::bottom_roller(bottom_roller1, bottom_roller2);
 motor Hardware::top_roller(PORT15, gearSetting::ratio6_1);
 
 // End Hardware Initialization
-
-//HARDWARE CONTROL
-using namespace Hardware;
-/**
-* Directly set the voltage of each motor on the uptake
-*/
-void uptake(int top, int middle, int bottom){
-  bottom_roller1.spin(fwd, bottom, volt);
-  bottom_roller2.spin(fwd, bottom, volt);
-  top_roller.spin(fwd, top, volt);
-}
-/**
-* Same as above but control how many revolutions 
-*/
-void uptakeRevolution(int top, int bottom, int speed){
-  bottom_roller.rotateFor(bottom, rev, speed, velocityUnits::pct);
-  top_roller.rotateFor(top, rev, speed, velocityUnits::pct, true); 
-}
-/**
-* Stop all motors on the uptake system
-*/
-void stopIntaking(){
-  intake.stop();
-  bottom_roller.stop();
-  top_roller.stop();
-}
-
-/**
-* This sub function carries out the deployment and won't allow the run to continue
-* unless the robot has deployed
-*/
-void deploy(){
-  bottom_roller.spin(reverse, 13, volt);
-    wait(400, msec);
-  bottom_roller.spin(fwd, 13, volt);
-    wait(250, msec);
-  top_roller.spin(reverse, 13, volt);
-  bottom_roller.spin(reverse, 13, volt);
-    wait(200, msec);
-  top_roller.stop();
-  bottom_roller.stop();
-}
-
-timer shootPause = timer();
-
-void shootIndexer(){
-  int counter = 0;
-  float prevTime = shootPause.time(msec);
-  intake.spin(fwd, 13, volt);
-while(1){
-    if(counter == 0){ //only executes upon entering the loop
-      top_roller.spin(fwd, 13, volt); //get the top roller up to speed
-      counter++;
-      wait(100, msec);
-    }
-
-    bottom_roller2.spin(fwd, 13, volt); //shoot top ball
-    bottom_roller1.spin(reverse, 10, volt); //hold back botttom ball
-
-    if(indexer.objectDistance(mm) <= 20 || shootPause.time() - prevTime > 2000){ //if the top ball reaches the top sensor or timer passes
-      wait(250, msec); //wait until the ball fully exits
-      top_roller.spin(reverse, 13, volt); //bring bottom ball back down to shooting position
-      bottom_roller1.spin(fwd, 13, volt);
-      
-      while(indexer.objectDistance(mm) > 200 || shootPause.time() - prevTime > 4000) //wait untill ball shoots out or after 4 secs
-        wait(10,msec); //spin the uptake until the 2nd ball reaches index 
-        break;
-    }
-    
-    wait(20,msec);
-  }
-  bottom_roller.rotateFor(reverse, .1, rev, 300, velocityUnits::rpm, false);
-  top_roller.rotateFor(reverse, 1, rev, 600, velocityUnits::rpm, false);
-}
-
-void indexing(){
-  int counter = 0;
-  float prevTime = shootPause.time(msec);
-  intake.spin(fwd, 13, volt);
- while(master.ButtonL1.pressing()){
-    if(counter == 0){ //only executes upon entering the loop
-      top_roller.spin(fwd, 13, volt); //get the top roller up to speed
-      counter++;
-      wait(100, msec);
-    }
-
-    bottom_roller2.spin(fwd, 13, volt); //shoot top ball
-    bottom_roller1.spin(reverse, 10, volt); //hold back botttom ball
-
-    if(indexer.objectDistance(mm) <= 20 || shootPause.time() - prevTime > 2000){ //if the top ball reaches the top sensor or timer passes
-      wait(250, msec); //wait until the ball fully exits
-      bottom_roller2.spin(fwd, 13, volt); //shoot top ball
-      bottom_roller1.spin(fwd, 13, volt); //hold back botttom ball
-      break;
-    }
-    
-    wait(20,msec);
-  }
-  top_roller.stop();
-  bottom_roller.stop();
-  bottom_roller.rotateFor(reverse, .1, rev, 300, velocityUnits::rpm, false);
-  top_roller.rotateFor(reverse, 1, rev, 600, velocityUnits::rpm, false);
-}
 
 
 

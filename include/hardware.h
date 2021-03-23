@@ -40,7 +40,7 @@ extern motor_group bottom_roller;
 // -- SENSORS --
 extern inertial inertia;
 extern distance indexer;
-extern limit lowerIndexer;
+extern distance lowerIndexer;
 extern line intakeIndexer;
 extern distance goalSensor;
 

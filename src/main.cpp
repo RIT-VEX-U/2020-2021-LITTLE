@@ -13,7 +13,6 @@
 #include "competition/opcontrol.h"
 
 using namespace Hardware;
-#include <iostream>
 using namespace vex;
 
 competition comp;
