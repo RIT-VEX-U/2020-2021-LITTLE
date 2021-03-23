@@ -46,6 +46,9 @@ float descoringRotation = 2;
 void Auto::autonomous(){
   autonSensors = thread(getCurrentState);
 
+  move(24, 1, 0);
+  wait(500000, msec);
+
   //had to hard code lol
   intakeLeft.setBrake(brake);
   intakeRight.setBrake(brake);

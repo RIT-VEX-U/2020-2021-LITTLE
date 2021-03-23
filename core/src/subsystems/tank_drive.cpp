@@ -72,22 +72,21 @@ bool TankDrive::drive_forward(double inches, double percent_speed)
 
     drive_pid.set_limits(-fabs(percent_speed), fabs(percent_speed));
 
-    std::cout << "target set: " << inches / (PI * config.wheel_diam * config.wheel_motor_ratio) << "\n" << std::flush;
+    std::cout << "target [rev]: " << inches / (PI * config.wheel_diam * config.wheel_motor_ratio) << std::flush;
 
     // setting target to # revolutions the motor has to do
-    drive_pid.set_target(inches / (PI * config.wheel_diam * config.wheel_motor_ratio));
+    drive_pid.set_target(inches*2.9 / (PI * config.wheel_diam * config.wheel_motor_ratio));
 
     initialize_func = false;
   }
 
   // Update PID loop and drive the robot based on it's output
   drive_pid.update(left_motors.position(rotationUnits::rev));
-  std::cout << "update motor 1: " << Hardware::lf.position(rotationUnits::rev) << "\n" << std::flush;
-  std::cout << "update motor 2: " << Hardware::lr.position(rotationUnits::rev) << "\n" << std::flush;
-  std::cout << "update motor 3: " << Hardware::lr2.position(rotationUnits::rev) << "\n" << std::flush;
+  std::cout << "left side [rev]: " << left_motors.position(rev) << std::endl;
+  std::cout << "distanceError: " << drive_pid.get_error() << std::endl;
 
   double pid_out = drive_pid.get();
-  std::cout << "pid out: " << pid_out << "\n" << std::flush;
+  std::cout << "output: " << pid_out << "\n" << std::flush;
   drive_tank(pid_out, pid_out);
 
   // If the robot is at it's target, return true

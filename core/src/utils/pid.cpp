@@ -20,8 +20,6 @@ void PID::update(double sensor_val)
 
   double time_delta = pid_timer.value() - last_time;
 
-  std::cout << "error: " << get_error() << "\n" << std::flush;
-
   accum_error += time_delta * get_error();
 
   out = (config.f * target) + (config.p * get_error()) + (config.i * accum_error) + (config.d * (get_error() - last_error) / time_delta);

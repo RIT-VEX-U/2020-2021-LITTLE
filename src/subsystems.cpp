@@ -55,12 +55,12 @@ void deploy(){
 * Continually get state of the balls in the robot
 */
 void updateSensorState(){
-    if(indexer.value() < 15) //is there a ball at the top?
+    if(indexer.value() < 10) //is there a ball at the top?
       topSensor = true;
     else
       topSensor = false;
 
-    if(lowerIndexer.value() < 10) //is there a ball in the middle? -- distance sensor broke RIP
+    if(lowerIndexer.value() < 30) //is there a ball in the middle? -- distance sensor broke RIP
       midSensor = true;
     else
       midSensor = false;
@@ -71,9 +71,8 @@ void updateSensorState(){
       bottomSensor = false;
 
     //debug
-    std::cout << "Top State: " << topSensor << std::endl;
-    std::cout << "Mid State: " << midSensor << std::endl;
-    //<< std::endl;
+    //std::cout << "Top State: " << topSensor << std::endl;
+    //std::cout << "Mid State: " << midSensor << std::endl;
     //std::cout << "Bottom State: " << bottomSensor << std::endl;
     //std::cout << "" << std::endl;
 }
@@ -136,25 +135,23 @@ void runIntake(){
         uptake(13,2,8); //run uptake until ball reaches the top roller
       }else if (topSensor) { // if there is a ball at the top
          intake.spin(fwd, 13, volt);
-         uptake(-5, 2, 2);
+         uptake(-5, 2, 1);
       }else{
          intake.spin(fwd, 13, volt); //otherwise, just run intakes
          bottom_roller.stop(brake);
       }
-   }else if(master.ButtonR1.pressing() && master.ButtonR2.pressing()){ 
-        intake.rotateFor(fwd, 2, rev); //descore 1 ball –– non blocking 
-
    }else if(master.ButtonL2.pressing()){ //regular outtake
         intake.spin(reverse, 13, volt);
        uptake(-13, -13, -13);
-
-   }else if(master.ButtonL1.pressing() && master.ButtonL2.pressing()){ //center goal descore
+       if(master.ButtonR2.pressing()){ //center goal descore
          bottom_roller.stop(brake);
          top_roller.stop(brake);
          intake.spin(reverse, 13, volt); //only outtake intakes
+       }
    }else{
       bottom_roller.stop(brake);
-      top_roller.spin(reverse, 4, volt); //always run backwards unless shooting
+      //top_roller.spin(reverse, 4, volt); //always run backwards unless shooting
+      top_roller.stop();
       intake.stop();
    }
 }
@@ -170,36 +167,36 @@ void runIntake(){
 
 void shoot(int balls){ 
   bool prevVal = topSensor, ballShot;
-  int entryTime = t.time(msec), shootTime = 1500; //shoot time determines how long before loop cuts out to prevent stuck loops
+  int entryTime, shootTime = 1000, indexTime = 500 ,exitTime; //shoot time determines how long before loop cuts out to prevent stuck loops
 
-  for(int i = 0; i <= balls; i++){ //cycle through a shoot cycle depending on how many balls need to be shot
+  for(int i = 0; i < balls; i++){ //cycle through a shoot cycle depending on how many balls need to be shot
     ballShot = false; //reset exit conditions
-
+    entryTime = t.time(msec);
     while(!ballShot){ //run the uptake until a ball gets shot
       if(t.time(msec) - entryTime > shootTime) //if you get stuck shooting
         break;
 
        top_roller.spin(fwd, 13, volt);
-       wait(250, msec); //get up to speed –– first ball should always be well under the top roller
+       wait(200, msec); //get up to speed –– first ball should always be well under the top roller
        bottom_roller2.spin(fwd, 13, volt); //shoot top indexed ball only
 
        if(topSensor != prevVal){ //if the ball leaves the top sensor -- presumably shot by the top roller
           ballShot = true; //allow top ball to exit fully because sensor is placed lower than top roller
-          wait(500, msec);
+          wait(200, msec);
        }
 
       wait(20, msec);
     }
-
+    exitTime = t.time();
     //after ball gets shot
     top_roller.spin(reverse, 8, volt); //prevent other balls from exiting
-    bottom_roller2.stop();
 
-    if(i == 1){ //if there is a ball to be indexed -- skips after first iteration
+     //if there is a ball to be indexed -- skips after first iteration
       while(!topSensor){
+        if(t.time(msec) - exitTime > indexTime)
+          break;
         uptake(0,2,8);
         wait(20,msec);
-      }
     }
   }
   uptake(0,0,0); //stop all after exiting everything

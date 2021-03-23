@@ -26,16 +26,16 @@ motor Hardware::lf(PORT14, gearSetting::ratio6_1), Hardware::rf(PORT18, gearSett
 TankDrive::tankdrive_config_t tank_config = {
   (PID::pid_config_t) {
     // p, i, d, f
-    //1.0, 0, 0, 0,
-    .95, 0, 0, 0,
+    //.95, 0, 0, 0,
+    .26, 0, 0, 0,
     // deadband, on_target_time
     0.05, 0
   },
   (PID::pid_config_t) {
     // p, i, d, f
-    0.005, 0, 0, 0,
+    0.007, 0, 0.000, 0,
     // deadband, on_target_time
-    1.5, 0
+    1, 0
   
   },
   // wheel diam
