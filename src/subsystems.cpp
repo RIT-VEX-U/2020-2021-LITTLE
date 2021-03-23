@@ -4,9 +4,6 @@
 //HARDWARE CONTROL
 using namespace Hardware;
 
-// -- tasks --
-task stateTask; //update sensors in parallel to everything
-
 //global variables within file
 int ballCounter = 0, goalLevel = 1, prevBallCount = 0, currentState = 0; //track robot states 
 bool bottomSensor = false, midSensor = false, topSensor = false;
@@ -58,12 +55,12 @@ void deploy(){
 * Continually get state of the balls in the robot
 */
 void updateSensorState(){
-    if(indexer.objectDistance(mm) < 5) //is there a ball at the top?
+    if(indexer.value() < 15) //is there a ball at the top?
       topSensor = true;
     else
       topSensor = false;
 
-    if(lowerIndexer.objectDistance(mm) < 50) //is there a ball in the middle? -- distance sensor broke RIP
+    if(lowerIndexer.value() < 10) //is there a ball in the middle? -- distance sensor broke RIP
       midSensor = true;
     else
       midSensor = false;
@@ -74,8 +71,9 @@ void updateSensorState(){
       bottomSensor = false;
 
     //debug
-    //std::cout << "Top State: " << topSensor << std::endl;
-    //std::cout << "Mid State: " << midSensor << std::endl;
+    std::cout << "Top State: " << topSensor << std::endl;
+    std::cout << "Mid State: " << midSensor << std::endl;
+    //<< std::endl;
     //std::cout << "Bottom State: " << bottomSensor << std::endl;
     //std::cout << "" << std::endl;
 }
@@ -94,15 +92,6 @@ void updateBallCount(){
       ballCounter = 0;
 }
 
-/**
-* Determine how many balls in the goal –– defaults to 1
-*/
-void updateGoalLevel(){
-    if(goalSensor.objectDistance(mm) <= 110) //if there's 2 blue balls in the goal?
-      goalLevel = 2;
-    else 
-      goalLevel = 1;
-}
 
 /**
 * Get ball states in the goal and robot -- for shooting function
@@ -111,15 +100,7 @@ int getCurrentState(){
   while(1){
     updateSensorState(); //ditto
     updateBallCount();
-    updateGoalLevel();
-
-  if(goalLevel == 2) //while there's two balls in the goal
-    currentState = 1;
-  else // otherwise only descore one and shoot two regardless
-    currentState = 0;
     
-  std::cout << "current state: " << currentState <<std::endl;
-
     this_thread::sleep_for(20);
   }
 
@@ -150,12 +131,12 @@ void index(){ //for after shooting
 */
 void runIntake(){
    if(master.ButtonR1.pressing()){ //is the button being pressed?
-      if(topSensor == false){ //if there is no ball at the top of the robot
+       if(!topSensor){ //if there is no ball at the top of the robot
         intake.spin(fwd, 13, volt);
         uptake(13,2,8); //run uptake until ball reaches the top roller
-      }else if (topSensor == true && midSensor == false) { // if there is a ball at the top
+      }else if (topSensor) { // if there is a ball at the top
          intake.spin(fwd, 13, volt);
-         uptake(-5, 1, 2);
+         uptake(-5, 2, 2);
       }else{
          intake.spin(fwd, 13, volt); //otherwise, just run intakes
          bottom_roller.stop(brake);
@@ -164,6 +145,7 @@ void runIntake(){
         intake.rotateFor(fwd, 2, rev); //descore 1 ball –– non blocking 
 
    }else if(master.ButtonL2.pressing()){ //regular outtake
+        intake.spin(reverse, 13, volt);
        uptake(-13, -13, -13);
 
    }else if(master.ButtonL1.pressing() && master.ButtonL2.pressing()){ //center goal descore

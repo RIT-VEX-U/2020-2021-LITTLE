@@ -1,9 +1,6 @@
 #include "hardware.h"
 #include "competition/opcontrol.h"
 
-
-extern thread stateThread; //allow global access to sensor states
-
 //Function List:
 
 //General Access / Auton
@@ -14,7 +11,7 @@ void stopAll();
 void uptakeRevolution(int top, int bottom, int speed);
 void uptake(int top, int middle, int bottom);
 
-//Sensors
+//Sensors -- task
 int getCurrentState();
 
 //OP Control

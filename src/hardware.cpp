@@ -11,14 +11,14 @@ controller Hardware::partner(controllerType::partner);
 // -- SENSORS --
 inertial Hardware::inertia(PORT16);
 distance Hardware::indexer(PORT6);
-distance Hardware::lowerIndexer(PORT5); //update port and sensor properly
+distance Hardware::lowerIndexer(PORT4); 
 line Hardware::intakeIndexer(Hardware::v5_brain.ThreeWirePort.A);
 distance Hardware::goalSensor(PORT10);
 
 // -- MOTORS --
-motor Hardware::lf(PORT14, gearSetting::ratio18_1), Hardware::rf(PORT18, gearSetting::ratio18_1, true),
-      Hardware::lr(PORT13, gearSetting::ratio18_1, true), Hardware::lr2(PORT2, gearSetting::ratio18_1, true),
-      Hardware::rr(PORT17, gearSetting::ratio18_1), Hardware::rr2(PORT9, gearSetting::ratio18_1);
+motor Hardware::lf(PORT14, gearSetting::ratio6_1), Hardware::rf(PORT18, gearSetting::ratio6_1, true),
+      Hardware::lr(PORT13, gearSetting::ratio6_1, true), Hardware::lr2(PORT2, gearSetting::ratio6_1, true),
+      Hardware::rr(PORT17, gearSetting::ratio6_1), Hardware::rr2(PORT9, gearSetting::ratio6_1);
 
 //MecanumDrive Hardware::mec_drive(lf, rf, lr, rr);
 

@@ -15,6 +15,7 @@
 using namespace Hardware;
 using namespace vex;
 
+
 competition comp;
 
 /**
@@ -36,7 +37,7 @@ int main()
 
   while (true)
   {
-    vexDelay(10);
+    wait(10, msec);
   }
 
   Hardware::v5_brain.Screen.print("Code exited the control loops. Restart code.");

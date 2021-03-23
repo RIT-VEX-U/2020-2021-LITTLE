@@ -4,6 +4,7 @@
 using namespace Hardware;
 
 thread driveThread;
+thread sensorThread;
 
 // -- CHASSIS --
 /**
@@ -24,7 +25,7 @@ int move(){
  void OpControl::opcontrol(){
    //allow tasks to run in background
    driveThread = thread(move); //allow chassis to move independent of everything
-   stateThread = thread(getCurrentState); //update sensors and state functions  
+   sensorThread = thread(getCurrentState); //update sensors and state functions  
  
    while(1){
      //allow other functions to run

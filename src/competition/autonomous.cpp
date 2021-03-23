@@ -4,6 +4,8 @@
 
 using namespace Hardware;
 
+thread autonSensors;
+
 /**
  * DRIVING TEST AUTO:
  */
@@ -42,6 +44,8 @@ void turnTo(float target, float percent, float waitTime){
 float descoringRotation = 2;
 
 void Auto::autonomous(){
+  autonSensors = thread(getCurrentState);
+
   //had to hard code lol
   intakeLeft.setBrake(brake);
   intakeRight.setBrake(brake);
