@@ -40,14 +40,18 @@ void turnTo(float target, float percent, float waitTime){
 
 /**
  * Code for the autonomous period is executed below.
+ * Everything is in inches and degrees
  */
-float descoringRotation = 2;
+float descoringRotation = 1.5, descoringOffset = 1.2; //descoring offset is the distance from the intaking center to the center of a goal at the descoring position
+float offset = 9.75; //distance of center of rotation to intaking center
 
 void Auto::autonomous(){
   autonSensors = thread(getCurrentState);
 
-  turnTo(90, 0.5, 20);
+  move(50, 1, 0);
   wait(500000, msec);
+
+  inertia.setRotation(-62.9, deg);//set starting position of robot
 
   //had to hard code lol
   intakeLeft.setBrake(brake);
@@ -58,43 +62,45 @@ void Auto::autonomous(){
   rf.setBrake(brake);
   rr.setBrake(brake);
   rr2.setBrake(brake);
-  
-  //inertia.calibrate();
-  //while(inertia.isCalibrating()){wait(5,msec);}
 
   deploy(); //score into side goal
 
 //score corner tower//////////////////////////////////////////////////////////////
-  //intake two balls in line
-  move(25, 10, 0); //go slow in on continuous motion until second ball
+  //intake first balls in line
   intake.spin(fwd, 13, volt);
+  uptake(0,0,2);
+  move(22, .6, 0);
   index();
-  move(5, 7, 100);
+  move(-3, 1, 0);
+
+  turnTo(-69.9, 1, 0); //intake second ball slowly
+  move(34.973 - 2.5, .9, 200); //subtract some distance to prevent robot from bottoming out on wall
   intake.stop();
 
   //back up to goal
-  move(-10, 13, 0);
+  move(-31 + offset + 1, 13, 0); //add to offset to counter previous offset
 
   //turn to goal
-  turnTo(-20, 1.0, 100);
+  turnTo(-128, 1.0, 100);
 
   //move towards goal 
-  move(20, 13, 0);
-  move(4,7, 100);
+  move(34.8 - offset - descoringOffset, 1, 0); //subtract offset twice
 
   //Score balls and descore two from corner
-  intake.rotateFor(fwd, descoringRotation*2, rev, false); //descore while shooting
-  shoot(2);
+  shoot(1);
+  intake.rotateFor(fwd, 3, rev, 100, velocityUnits::pct); //descore while shooting
+  shoot(1);
+  intake.rotateFor(fwd, 1, rev, 100, velocityUnits::pct, false); //descore while shooting
 
+ 
   //backout and spit out blue balls slowly
-  move(-13, 13, 0);
+  move(-19 + descoringOffset, 13, 0);
   uptake(-13, -7, -5);
   intake.spin(reverse, 6, volt);
-  index();
+  wait(1000, msec);
   intake.stop();
 
-  //turn to face back ball
-  turnTo(135, .8, 100); 
+  turnTo(0, .8, 100); 
   
 
 //score side tower/////////////////////////////////////////////////////////////

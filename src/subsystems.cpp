@@ -113,12 +113,16 @@ int getCurrentState(){
 */
 
 void index(){ //for after shooting
-    uptake(-10,2,6); //move ball up to second roller
+    double timeEntered = t.time(msec);
 
-    while(!topSensor){wait(10,msec);} //while the ball is not indexed 
-
-    uptake(-5, 5, -3); //backout any balls that over indexed
-    wait(200,msec);
+    while(!topSensor){
+      if(t.time() - timeEntered > 500)
+        break;
+        
+      uptake(-10,2,8); //move ball up to second roller
+      
+      wait(10,msec);
+    } //while the ball is not indexed 
 
     uptake(0,0,0); //stop
 }
@@ -165,7 +169,7 @@ void runIntake(){
 * @param number of balls to be shot 
 */
 
-void shoot(int balls){ 
+void shoot(int balls, bool indexBall = true){ 
   bool prevVal = topSensor, ballShot;
   int entryTime, shootTime = 1000, indexTime = 500 ,exitTime; //shoot time determines how long before loop cuts out to prevent stuck loops
 
@@ -192,7 +196,7 @@ void shoot(int balls){
     top_roller.spin(reverse, 8, volt); //prevent other balls from exiting
 
      //if there is a ball to be indexed -- skips after first iteration
-      while(!topSensor){
+      while(!topSensor && indexBall){
         if(t.time(msec) - exitTime > indexTime)
           break;
         uptake(0,2,8);

@@ -26,10 +26,10 @@ int move(){
    //allow tasks to run in background
    driveThread = thread(move); //allow chassis to move independent of everything
    sensorThread = thread(getCurrentState); //update sensors and state functions  
- 
-   while(1){
-     //allow other functions to run
+  
+   deploy();
 
+   while(1){
     //run intaking and shooting on the same thread –– one function automatically takes priority
      runIntake(); //determines when to intake/outtake
 

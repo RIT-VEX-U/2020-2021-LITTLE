@@ -16,18 +16,16 @@ line Hardware::intakeIndexer(Hardware::v5_brain.ThreeWirePort.A);
 distance Hardware::goalSensor(PORT10);
 
 // -- MOTORS --
-motor Hardware::lf(PORT14, gearSetting::ratio6_1), Hardware::rf(PORT18, gearSetting::ratio6_1, true),
-      Hardware::lr(PORT13, gearSetting::ratio6_1, true), Hardware::lr2(PORT2, gearSetting::ratio6_1, true),
-      Hardware::rr(PORT17, gearSetting::ratio6_1), Hardware::rr2(PORT9, gearSetting::ratio6_1);
+motor Hardware::lf(PORT14, gearSetting::ratio6_1), Hardware::lr(PORT13, gearSetting::ratio6_1, true), Hardware::lr2(PORT2, gearSetting::ratio6_1, true),
+      Hardware::rf(PORT18, gearSetting::ratio6_1, true), Hardware::rr(PORT17, gearSetting::ratio6_1), Hardware::rr2(PORT9, gearSetting::ratio6_1);
 
-//MecanumDrive Hardware::mec_drive(lf, rf, lr, rr);
+//MecanumDrive Hardware::mec_drive(lf, rf, lr, rr)
 
 // WARNING: NOT TUNED! These are filler values
 TankDrive::tankdrive_config_t tank_config = {
   (PID::pid_config_t) {
     // p, i, d, f
-    //.95, 0, 0, 0,
-    .25, 0, 0, 0,
+    .255, 0, 0.05, 0,
     // deadband, on_target_time
     0.05, 0
   },
