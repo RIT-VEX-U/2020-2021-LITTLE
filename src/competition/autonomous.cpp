@@ -46,7 +46,7 @@ float descoringRotation = 2;
 void Auto::autonomous(){
   autonSensors = thread(getCurrentState);
 
-  turnTo(90, float percent, float waitTime);
+  turnTo(90, 0.5, 20);
   wait(500000, msec);
 
   //had to hard code lol

@@ -33,9 +33,9 @@ TankDrive::tankdrive_config_t tank_config = {
   },
   (PID::pid_config_t) {
     // p, i, d, f
-    0.007, 0, 0.000, 0,
+    0.009, 0, 0.0007, 0,
     // deadband, on_target_time
-    1, 0
+    2, 0
   
   },
   // wheel diam

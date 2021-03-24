@@ -135,7 +135,7 @@ bool TankDrive::turn_degrees(double degrees, double percent_speed)
   }
 
   // Update PID loop and drive the robot based on it's output
-  //double curr_rotation = gyro_sensor.rotation(rotationUnits::deg);
+  double curr_rotation = gyro_sensor.rotation(rotationUnits::deg);
   turn_pid.update(curr_rotation);
   std::cout << "current: " << curr_rotation << "\n" << std::flush;
   double pid_out = turn_pid.get();
