@@ -27,7 +27,7 @@ TankDrive::tankdrive_config_t tank_config = {
   (PID::pid_config_t) {
     // p, i, d, f
     //.95, 0, 0, 0,
-    .26, 0, 0, 0,
+    .25, 0, 0, 0,
     // deadband, on_target_time
     0.05, 0
   },
