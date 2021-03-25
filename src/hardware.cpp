@@ -10,31 +10,28 @@ controller Hardware::partner(controllerType::partner);
 
 // -- SENSORS --
 inertial Hardware::inertia(PORT16);
-distance Hardware::indexer(PORT10);
-distance Hardware::lowerIndexer(PORT6);
-distance Hardware::intakeIndexer(PORT5);
+distance Hardware::indexer(PORT1);
+distance Hardware::lowerIndexer(PORT10); 
 
 // -- MOTORS --
-motor Hardware::lf(PORT14, gearSetting::ratio18_1), Hardware::rf(PORT18, gearSetting::ratio18_1, true),
-      Hardware::lr(PORT13, gearSetting::ratio18_1, true), Hardware::lr2(PORT2, gearSetting::ratio18_1, true),
-      Hardware::rr(PORT17, gearSetting::ratio18_1), Hardware::rr2(PORT9, gearSetting::ratio18_1);
+motor Hardware::lf(PORT14, gearSetting::ratio6_1), Hardware::lr(PORT13, gearSetting::ratio6_1, true), Hardware::lr2(PORT2, gearSetting::ratio6_1, true),
+      Hardware::rf(PORT18, gearSetting::ratio6_1, true), Hardware::rr(PORT17, gearSetting::ratio6_1), Hardware::rr2(PORT9, gearSetting::ratio6_1);
 
-//MecanumDrive Hardware::mec_drive(lf, rf, lr, rr);
+//MecanumDrive Hardware::mec_drive(lf, rf, lr, rr)
 
 // WARNING: NOT TUNED! These are filler values
 TankDrive::tankdrive_config_t tank_config = {
   (PID::pid_config_t) {
     // p, i, d, f
-    //1.0, 0, 0, 0,
-    .95, 0, 0, 0,
+    .27, 0, 0.05, 0,
     // deadband, on_target_time
-    0.05, 0
+    0.05, .08 //stay on target for 80 msec
   },
   (PID::pid_config_t) {
     // p, i, d, f
-    0.005, 0, 0, 0,
+    0.009, 0, 0.0007, 0,
     // deadband, on_target_time
-    1.5, 0
+    1, .08
   
   },
   // wheel diam
@@ -51,8 +48,12 @@ motor Hardware::intakeRight(PORT19, true);
 motor_group Hardware::intake(Hardware::intakeLeft, Hardware::intakeRight);
 
 motor Hardware::bottom_roller1(PORT12, gearSetting::ratio6_1);
-motor Hardware::bottom_roller2(PORT1, gearSetting::ratio6_1);
+motor Hardware::bottom_roller2(PORT7, gearSetting::ratio6_1, true);
 motor_group Hardware::bottom_roller(bottom_roller1, bottom_roller2);
 motor Hardware::top_roller(PORT15, gearSetting::ratio6_1);
 
 // End Hardware Initialization
+
+
+
+

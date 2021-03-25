@@ -5,6 +5,8 @@
 inertial &TankDrive::gyro_sensor = Hardware::inertia;
 double TankDrive::curr_rotation = 0;
 
+using namespace Hardware;
+
 TankDrive::TankDrive(motor_group &left_motors, motor_group &right_motors, inertial &gyro_sensor, TankDrive::tankdrive_config_t &config)
     : config(config), left_motors(left_motors), right_motors(right_motors), drive_pid(config.drive_pid), turn_pid(config.turn_pid)//, gyro_sensor(gyro_sensor)
 {
@@ -41,6 +43,12 @@ void TankDrive::drive_tank(double left, double right)
   right_motors.spin(directionType::fwd, right * 100, velocityUnits::pct);
 }
 
+void TankDrive::drive_volt(double left, double right)
+{
+  left_motors.spin(directionType::fwd, left, volt);
+  right_motors.spin(directionType::fwd, right, volt);
+}
+
 /**
  * Drive the robot using arcade style controls. forward_back controls the linear motion,
  * left_right controls the turning.
@@ -62,33 +70,43 @@ void TankDrive::drive_arcade(double forward_back, double left_right)
  * 
  * Uses a PID loop for it's control.
  */
+float prevAngle; //allows robot to follow the line defined by the angle defined from the previous turn or starting angle
+
 bool TankDrive::drive_forward(double inches, double percent_speed)
 {
   // On the first run of the funciton, reset the motor position and PID
   if (initialize_func)
   {
     left_motors.resetPosition();
+    right_motors.resetPosition();
     drive_pid.reset();
 
     drive_pid.set_limits(-fabs(percent_speed), fabs(percent_speed));
 
-    std::cout << "target set: " << inches / (PI * config.wheel_diam * config.wheel_motor_ratio) << "\n" << std::flush;
-
     // setting target to # revolutions the motor has to do
-    drive_pid.set_target(inches / (PI * config.wheel_diam * config.wheel_motor_ratio));
+    drive_pid.set_target(inches*2.78 / (PI * config.wheel_diam * config.wheel_motor_ratio));
 
     initialize_func = false;
   }
 
   // Update PID loop and drive the robot based on it's output
-  drive_pid.update(left_motors.position(rotationUnits::rev));
-  std::cout << "update motor 1: " << Hardware::lf.position(rotationUnits::rev) << "\n" << std::flush;
-  std::cout << "update motor 2: " << Hardware::lr.position(rotationUnits::rev) << "\n" << std::flush;
-  std::cout << "update motor 3: " << Hardware::lr2.position(rotationUnits::rev) << "\n" << std::flush;
+  drive_pid.update((left_motors.position(rotationUnits::rev) + right_motors.position(rev))/2);
+  //std::cout << "avg [rev]: " << (left_motors.position(rev) + right_motors.position(rev))/2<< std::endl;
+  //std::cout << "error: " << drive_pid.get_error() << std::endl;
 
   double pid_out = drive_pid.get();
-  std::cout << "pid out: " << pid_out << "\n" << std::flush;
-  drive_tank(pid_out, pid_out);
+  //std::cout << "output: " << pid_out << "\n" << std::flush;
+
+  double turnPower;
+  if(fabs(inertia.rotation() - prevAngle) > .5 && fabs(drive_pid.get_error()) > 1)
+   turnPower = (inertia.rotation() - prevAngle) * .01;
+  else
+    turnPower = 0;
+
+    std::cout << "tp: " << turnPower << "\n" << std::flush;
+
+
+  drive_tank(pid_out - turnPower, pid_out + turnPower);
 
   // If the robot is at it's target, return true
   if (drive_pid.is_on_target())
@@ -114,7 +132,7 @@ bool TankDrive::turn_degrees(double degrees, double percent_speed)
   // On the first run of the funciton, reset the gyro position and PID
   if (initialize_func)
   {
-    gyro_sensor.resetRotation();
+    prevAngle = degrees; //update global variable between drive function and turn function
     turn_pid.reset();
 
     turn_pid.set_limits(-fabs(percent_speed), fabs(percent_speed));
@@ -126,12 +144,10 @@ bool TankDrive::turn_degrees(double degrees, double percent_speed)
   }
 
   // Update PID loop and drive the robot based on it's output
-  //double curr_rotation = gyro_sensor.rotation(rotationUnits::deg);
-  turn_pid.update(curr_rotation);
-  std::cout << "current rotation: " << curr_rotation << "\n" << std::flush;
+  turn_pid.update(gyro_sensor.rotation(deg));
   double pid_out = turn_pid.get();
-  std::cout << "pid out: " << pid_out << "\n" << std::flush;
-  drive_tank(pid_out, -1 * pid_out);
+  //std::cout << "pid out: " << pid_out << "\n" << std::flush;
+  drive_tank(pid_out, -pid_out);
 
   // If the robot is at it's target, return true
   if (turn_pid.is_on_target())

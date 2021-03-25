@@ -12,7 +12,9 @@
 #include "competition/autonomous.h"
 #include "competition/opcontrol.h"
 
+using namespace Hardware;
 using namespace vex;
+
 
 competition comp;
 
@@ -35,7 +37,7 @@ int main()
 
   while (true)
   {
-    vexDelay(100);
+    wait(10, msec);
   }
 
   Hardware::v5_brain.Screen.print("Code exited the control loops. Restart code.");
