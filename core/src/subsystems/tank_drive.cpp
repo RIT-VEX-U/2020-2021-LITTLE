@@ -43,6 +43,12 @@ void TankDrive::drive_tank(double left, double right)
   right_motors.spin(directionType::fwd, right * 100, velocityUnits::pct);
 }
 
+void TankDrive::drive_volt(double left, double right)
+{
+  left_motors.spin(directionType::fwd, left, volt);
+  right_motors.spin(directionType::fwd, right, volt);
+}
+
 /**
  * Drive the robot using arcade style controls. forward_back controls the linear motion,
  * left_right controls the turning.

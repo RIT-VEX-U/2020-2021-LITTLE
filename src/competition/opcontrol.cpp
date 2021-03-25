@@ -12,7 +12,20 @@ thread sensorThread;
 */
 int move(){
   while(1){
-   tank_drive.drive_tank(master.Axis3.position() / 100.0, master.Axis2.position() / 100.0); //control chassis
+    double outputL = pow(master.Axis3.position(),3)/pow(127,2);
+    double outputR = pow(master.Axis2.position(),3)/pow(127,2);
+
+    int lSign = outputL/fabs(outputL);
+    int rSign = outputR/fabs(outputR);
+
+    if(lSign != rSign){ //if turning
+      if(fabs(outputL) > 8)
+        outputL = 8*lSign;
+      if(fabs(outputR) > 8)
+        outputR = 8*rSign;
+    }
+  
+   tank_drive.drive_volt(outputL, outputR); //control chassis
    this_thread::sleep_for(20);
   }
   return 0;
@@ -23,11 +36,11 @@ int move(){
  */
  
  void OpControl::opcontrol(){
+   deploy();
+
    //allow tasks to run in background
    driveThread = thread(move); //allow chassis to move independent of everything
-   sensorThread = thread(getCurrentState); //update sensors and state functions  
-  
-   deploy();
+   sensorThread = thread(getCurrentState); //update sensors and state functions 
 
    while(1){
     //run intaking and shooting on the same thread –– one function automatically takes priority

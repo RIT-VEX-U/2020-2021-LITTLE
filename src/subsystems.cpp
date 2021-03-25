@@ -47,6 +47,7 @@ void deploy(){
   bottom_roller1.spin(reverse, 13, volt); //release intakes
   wait(500,msec); //allow time for all parts to release
   bottom_roller.stop(); 
+  wait(1000, msec);
 }
 
 // -- INDEXING -- 
@@ -139,15 +140,15 @@ void runIntake(){
         uptake(13,2,8); //run uptake until ball reaches the top roller
       }else if (topSensor) { // if there is a ball at the top
          intake.spin(fwd, 13, volt);
-         uptake(-5, 2, 1);
+         uptake(-5, 1, 1);
       }else{
          intake.spin(fwd, 13, volt); //otherwise, just run intakes
          bottom_roller.stop(brake);
       }
-   }else if(master.ButtonL2.pressing()){ //regular outtake
+   }else if(master.ButtonR2.pressing()){ //regular outtake
         intake.spin(reverse, 13, volt);
        uptake(-13, -13, -13);
-       if(master.ButtonR2.pressing()){ //center goal descore
+       if(master.ButtonL2.pressing()){ //center goal descore
          bottom_roller.stop(brake);
          top_roller.stop(brake);
          intake.spin(reverse, 13, volt); //only outtake intakes
