@@ -70,7 +70,7 @@ void TankDrive::drive_arcade(double forward_back, double left_right)
  * 
  * Uses a PID loop for it's control.
  */
- float prevAngle;
+float prevAngle; //allows robot to follow the line defined by the angle defined from the previous turn or starting angle
 
 bool TankDrive::drive_forward(double inches, double percent_speed)
 {
@@ -80,7 +80,6 @@ bool TankDrive::drive_forward(double inches, double percent_speed)
     left_motors.resetPosition();
     right_motors.resetPosition();
     drive_pid.reset();
-    prevAngle = inertia.rotation();
 
     drive_pid.set_limits(-fabs(percent_speed), fabs(percent_speed));
 
@@ -92,11 +91,11 @@ bool TankDrive::drive_forward(double inches, double percent_speed)
 
   // Update PID loop and drive the robot based on it's output
   drive_pid.update((left_motors.position(rotationUnits::rev) + right_motors.position(rev))/2);
-  std::cout << "avg [rev]: " << (left_motors.position(rev) + right_motors.position(rev))/2<< std::endl;
-  std::cout << "error: " << drive_pid.get_error() << std::endl;
+  //std::cout << "avg [rev]: " << (left_motors.position(rev) + right_motors.position(rev))/2<< std::endl;
+  //std::cout << "error: " << drive_pid.get_error() << std::endl;
 
   double pid_out = drive_pid.get();
-  std::cout << "output: " << pid_out << "\n" << std::flush;
+  //std::cout << "output: " << pid_out << "\n" << std::flush;
 
   double turnPower;
   if(fabs(inertia.rotation() - prevAngle) > .5 && fabs(drive_pid.get_error()) > 1)
@@ -133,6 +132,7 @@ bool TankDrive::turn_degrees(double degrees, double percent_speed)
   // On the first run of the funciton, reset the gyro position and PID
   if (initialize_func)
   {
+    prevAngle = degrees; //update global variable between drive function and turn function
     turn_pid.reset();
 
     turn_pid.set_limits(-fabs(percent_speed), fabs(percent_speed));

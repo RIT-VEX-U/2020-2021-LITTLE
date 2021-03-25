@@ -16,8 +16,8 @@ void Init::vexcodeInit(void)
   // Initialize the robot configuration variables
   Config::initConfig();
 
-  //inertia.calibrate();
-  //while(inertia.isCalibrating()){wait(5,msec);} //don't move robot during this time
+  inertia.calibrate();
+  while(inertia.isCalibrating()){wait(5,msec);} //don't move robot during this time
 
   Hardware::v5_brain.Screen.print("Robot Code Initialized.");
   Hardware::master.Screen.print("Gyro Calibrated.");

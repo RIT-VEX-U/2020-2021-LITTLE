@@ -10,10 +10,8 @@ controller Hardware::partner(controllerType::partner);
 
 // -- SENSORS --
 inertial Hardware::inertia(PORT16);
-distance Hardware::indexer(PORT6);
-distance Hardware::lowerIndexer(PORT4); 
-line Hardware::intakeIndexer(Hardware::v5_brain.ThreeWirePort.A);
-distance Hardware::goalSensor(PORT10);
+distance Hardware::indexer(PORT1);
+distance Hardware::lowerIndexer(PORT10); 
 
 // -- MOTORS --
 motor Hardware::lf(PORT14, gearSetting::ratio6_1), Hardware::lr(PORT13, gearSetting::ratio6_1, true), Hardware::lr2(PORT2, gearSetting::ratio6_1, true),
@@ -25,15 +23,15 @@ motor Hardware::lf(PORT14, gearSetting::ratio6_1), Hardware::lr(PORT13, gearSett
 TankDrive::tankdrive_config_t tank_config = {
   (PID::pid_config_t) {
     // p, i, d, f
-    .255, 0, 0.05, 0,
+    .27, 0, 0.05, 0,
     // deadband, on_target_time
-    0.05, 0
+    0.05, .08 //stay on target for 80 msec
   },
   (PID::pid_config_t) {
     // p, i, d, f
     0.009, 0, 0.0007, 0,
     // deadband, on_target_time
-    2, 0
+    1, .08
   
   },
   // wheel diam

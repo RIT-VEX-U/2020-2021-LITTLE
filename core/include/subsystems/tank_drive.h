@@ -85,4 +85,6 @@ private:
   bool initialize_func = true;
 };
 
+extern float prevAngle;
+
 #endif

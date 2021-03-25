@@ -5,8 +5,8 @@
 using namespace Hardware;
 
 //global variables within file
-int ballCounter = 0, goalLevel = 1, prevBallCount = 0, currentState = 0; //track robot states 
-bool bottomSensor = false, midSensor = false, topSensor = false;
+int ballCounter = 0; //track robot states 
+bool bottomSensor = false, topSensor = false;
 
 //TIMERS
 timer shootDelay = timer(); //timer tracking the timing of a shot
@@ -62,14 +62,10 @@ void updateSensorState(){
       topSensor = false;
 
     if(lowerIndexer.value() < 30) //is there a ball in the middle? -- distance sensor broke RIP
-      midSensor = true;
-    else
-      midSensor = false;
-
-    if(intakeIndexer.value(mV) < 2500) //is there a ball in the intakes?
       bottomSensor = true;
     else
       bottomSensor = false;
+
 
     //debug
     //std::cout << "Top State: " << topSensor << std::endl;
@@ -82,11 +78,9 @@ void updateSensorState(){
 * Determine how many balls are in the robot
 */
 void updateBallCount(){
-    if(topSensor && midSensor && bottomSensor)
-      ballCounter = 3;
-    else if((topSensor && midSensor && !bottomSensor) || (!topSensor && midSensor && bottomSensor))
+    if(topSensor && bottomSensor)
       ballCounter = 2;
-    else if((topSensor && !midSensor && !bottomSensor) || (!topSensor && midSensor && !bottomSensor)|| (!topSensor && !midSensor && bottomSensor))
+    else if(topSensor && bottomSensor)
       ballCounter = 1;
     else
       ballCounter = 0;
@@ -172,7 +166,7 @@ void runIntake(){
 
 void shoot(int balls, bool indexBall = true){ 
   bool prevVal = topSensor, ballShot;
-  int entryTime, shootTime = 1000, indexTime = 500 ,exitTime; //shoot time determines how long before loop cuts out to prevent stuck loops
+  int entryTime, shootTime = 1000, indexTime = 1000, exitTime; //shoot time determines how long before loop cuts out to prevent stuck loops
 
   for(int i = 0; i < balls; i++){ //cycle through a shoot cycle depending on how many balls need to be shot
     ballShot = false; //reset exit conditions

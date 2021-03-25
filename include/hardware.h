@@ -41,8 +41,7 @@ extern motor_group bottom_roller;
 extern inertial inertia;
 extern distance indexer;
 extern distance lowerIndexer;
-extern line intakeIndexer;
-extern distance goalSensor;
+
 
 //End Hardware Declarations
 } // namespace Hardware
