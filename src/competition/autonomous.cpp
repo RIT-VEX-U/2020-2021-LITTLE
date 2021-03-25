@@ -96,14 +96,20 @@ void Auto::autonomous(){
   intake.stop();
 
   //turn to ball
-  turnTo(3.5, 1, 0); 
+  turnTo(3.2, 1, 0); 
   
 //score side tower/////////////////////////////////////////////////////////////
   //move to ball and intake
   intake.spin(fwd, 13, volt);
   move(44 + offset, 1, 0);
   intake.stop();
-  index();
+  
+  while(!tank_drive.drive_forward(-5, 1)){
+    index(); 
+    vexDelay(20);
+    } //move towards goal 
+  tank_drive.stop();
+  
  
   //turn to the goal and score
   turnTo(-90, 1.0, 100);
@@ -141,7 +147,7 @@ void Auto::autonomous(){
   intake.stop();
 
   //turn to ball on diagonal and intake
-  turnTo(154, .8, 100); //slow speed for long movements after turns
+  turnTo(45, .8, 100); //slow speed for long movements after turns
   move(14, 13, 0);
   intake.spin(fwd, 13, volt);
   move(18, 7, 200);
