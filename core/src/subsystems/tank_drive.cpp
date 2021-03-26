@@ -160,8 +160,8 @@ bool TankDrive::turn_degrees(double degrees, double volt)
   std::cout << "out: " << pid_out << std::endl;
   int sign = pid_out/fabs(pid_out);
 
-  if(fabs(pid_out) < 2.5) //prevent from not being able to move
-    pid_out = 2.5*sign;
+  if(fabs(pid_out) < 2.7) //prevent from not being able to move
+    pid_out = 2.7*sign;
 
   drive_volt(pid_out, -pid_out);
   std::cout << "" << pid_out << std::endl;
