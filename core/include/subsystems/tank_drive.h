@@ -56,7 +56,7 @@ public:
    * 
    * Uses a PID loop for it's control.
    */
-  bool drive_forward(double inches, double percent_speed);
+  bool drive_forward(double inches, double volt);
 
   /**
    * Autonomously turn the robot X degrees to the right (negative for left), with a maximum motor speed
@@ -64,7 +64,7 @@ public:
    * 
    * Uses a PID loop for it's control.
    */
-  bool turn_degrees(double degrees, double percent_speed);
+  bool turn_degrees(double degrees, double volt);
 
 private:
   tankdrive_config_t &config;

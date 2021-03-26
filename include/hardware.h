@@ -35,7 +35,8 @@ extern motor_group intake;
 extern motor top_roller;
 extern motor bottom_roller1;
 extern motor bottom_roller2;
-extern motor_group bottom_roller;
+extern motor mid_roller;
+extern motor_group bottom_rollers;
 
 // -- SENSORS --
 extern inertial inertia;
@@ -45,11 +46,5 @@ extern distance lowerIndexer;
 
 //End Hardware Declarations
 } // namespace Hardware
-
-void uptake(int top, int middle, int bottom);
-void uptakeRevolution(int top, int bottom, int speed);
-void stopIntaking();
-void deploy();
-void indexing();
 
 #endif

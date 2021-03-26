@@ -22,16 +22,16 @@ motor Hardware::lf(PORT14, gearSetting::ratio6_1), Hardware::lr(PORT13, gearSett
 // WARNING: NOT TUNED! These are filler values
 TankDrive::tankdrive_config_t tank_config = {
   (PID::pid_config_t) {
-    // p, i, d, f
-    .27, 0, 0.05, 0,
+    // p, i, d, f –– 3.9 works well just for p and everything, 5.7 ands .16pd?
+    6.3, 0, 0.115, 0,
     // deadband, on_target_time
-    0.05, .08 //stay on target for 80 msec
+    0.05, .08, //stay on target for 80 msec
   },
   (PID::pid_config_t) {
     // p, i, d, f
-    0.009, 0, 0.0007, 0,
+    .167, 0, 0.007, 0,
     // deadband, on_target_time
-    1, .08
+    1, .1, 
   
   },
   // wheel diam
@@ -48,8 +48,9 @@ motor Hardware::intakeRight(PORT19, true);
 motor_group Hardware::intake(Hardware::intakeLeft, Hardware::intakeRight);
 
 motor Hardware::bottom_roller1(PORT12, gearSetting::ratio6_1);
-motor Hardware::bottom_roller2(PORT7, gearSetting::ratio6_1, true);
-motor_group Hardware::bottom_roller(bottom_roller1, bottom_roller2);
+motor Hardware::bottom_roller2(PORT5, gearSetting::ratio6_1);
+motor Hardware::mid_roller(PORT7, gearSetting::ratio6_1, true);
+motor_group Hardware::bottom_rollers(bottom_roller1, Hardware::bottom_roller2, Hardware::mid_roller);
 motor Hardware::top_roller(PORT15, gearSetting::ratio6_1);
 
 // End Hardware Initialization
