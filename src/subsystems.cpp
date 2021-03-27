@@ -171,7 +171,7 @@ void runIntake(){
 
 void shoot(int balls, bool indexBall = true){ 
   bool prevVal = topSensor, ballShot;
-  int entryTime, shootTime = 1000, indexTime = 1000, exitTime; //shoot time determines how long before loop cuts out to prevent stuck loops
+  int entryTime, shootTime = 1000, indexTime = 800, exitTime; //shoot time determines how long before loop cuts out to prevent stuck loops
 
   for(int i = 0; i < balls; i++){ //cycle through a shoot cycle depending on how many balls need to be shot
     ballShot = false; //reset exit conditions

@@ -71,18 +71,19 @@ void Auto::autonomous(){
   index();
   
   turnTo(-61, 13, 0); //intake second ball slowly
-  move(26.2, 13, 100); //subtract some distance to prevent robot from bottoming out on wall
+  move(27.6, 13, 100); //subtract some distance to prevent robot from bottoming out on wall
   
 
   //back up to goal
   move(-32.6 + offset + 2.5, 11, 0); //add to offset to counter previous offset
   intake.stop();
+  uptake(0,0,0);
 
   //turn to goal
   turnTo(-120.9, 11, 100);
 
   //move towards goal 
-  move(36.1 - offset - descoringOffset, 10, 0); //subtract offset twice
+  move(36.2 - offset - descoringOffset, 10, 0); //subtract offset twice
 
   //Score balls and descore two from corner
   intake.rotateFor(fwd, 1.5, rev, 100, velocityUnits::pct, false); //descore while shooting
@@ -93,7 +94,7 @@ void Auto::autonomous(){
   //backout and spit out blue balls slowly
   uptake(-13, -13, -7);
   intake.spin(reverse, 10, volt);
-  wait(300, msec);
+  wait(200, msec);
   move(-24 + descoringOffset, 13, 0);
   intake.stop();
 
@@ -106,7 +107,7 @@ void Auto::autonomous(){
   move(43 + offset, 13, 0);
   intake.stop();
   index();
-  move(-7.5, 13, 0);
+  move(-6.5, 13, 0);
  
   //turn to the goal and score
   turnTo(-83, 13, 0);
@@ -124,7 +125,7 @@ void Auto::autonomous(){
   //turn to diagonal ball and intake
   turnTo(12, 13, 0);
   intake.spin(fwd, 13, volt); //intake ball
-  move(45, 13, 0);
+  move(45.5, 13, 0);
   index();
   intake.stop();
 
@@ -132,7 +133,7 @@ void Auto::autonomous(){
 
 
 //score 2nd corner goal/////////////////////////////////////////////////////////////
-  turnTo(-41.7, 11, 0);
+  turnTo(-40, 11, 0);
   move(28.8, 11, 0); //move to goal
   //descore before shooting
   intake.rotateFor(fwd, 3.4, rev, 100, velocityUnits::pct, false); 
@@ -147,30 +148,30 @@ void Auto::autonomous(){
   //turn to ball on diagonal and intake
   turnTo(119, 13, 0); //slow speed for long movements after turns
   intake.spin(fwd, 13, volt);
-  move(45, 10, 0);
+  move(40, 10, 0);
   intake.stop();
   index();
   
 
 //score 2nd side goal/////////////////////////////////////////////////////////////
-  turnTo(-2, 13, 0);
+  turnTo(8, 13, 0);
 
   //score ball and descore tower
-  move(38, 11, 0);
+  move(36.5, 11, 0);
   intake.rotateFor(fwd, 1.2, rev, 100, velocityUnits::pct); //blocking code
   shoot(1);
 
   //back out and spit ball out
   intake.spin(reverse, 7, volt);
   uptake(-13, -13, -8);
-  move(-15, 13, 0);
+  move(-12, 13, 0);
   intake.stop();
 
 //score 3rd corner goal/////////////////////////////////////////////////////////////
   //turn to ball and intake
-  turnTo(93.5, 13, 0);
+  turnTo(94.5, 13, 0);
   intake.spin(fwd, 13, volt);
-  move(48, 13, 0);
+  move(52, 13, 0);
   index();
   intake.stop();
 
@@ -183,20 +184,19 @@ void Auto::autonomous(){
   //backout and spit out balls
   uptake(-13, -13, -7);
   intake.spin(reverse, 8, volt);
-  move(-28, 13, 0);
+  move(-27, 13, 0);
 
 //score 3rd side goal/////////////////////////////////////////////////////////////
   //turn to ball and intake
   turnTo(180, 13, 0);
   intake.spin(fwd, 13, volt);
-  move(42.5, 13, 0);
+  move(40, 13, 0);
   intake.stop();
   index();
-  move(-3.5, 13, 0);
-
+  
   //turn to goal score
-  turnTo(90.5, 13, 0);
-  move(11, 11, 0);
+  turnTo(91, 13, 0);
+  move(10.5, 11, 0);
   intake.rotateFor(fwd, 1.5, rev, 100, velocityUnits::pct, false); 
   shoot(1);
 
@@ -219,7 +219,7 @@ void Auto::autonomous(){
 
   //turn to goal and score
   turnTo(136.5, 13, 0);
-  move(28, 11, 0);
+  move(31, 11, 0);
   intake.rotateFor(fwd, 3.2, rev, 100, velocityUnits::pct, false);
   shoot(1);
 
@@ -232,15 +232,15 @@ void Auto::autonomous(){
   uptake(0,0,0);
   
   //turn to final ball and intake
-  turnTo(300, 13, 0);
+  turnTo(299, 13, 0);
   intake.spin(fwd, 13, volt);
-  move(30, 13, 0);
+  move(32.5, 13, 0);
   intake.stop();
   index();
 
   //turn to goal and to descore
-  turnTo(-2, 13, 0);
-  move(12, 8, 0);
+  turnTo(360, 13, 0);
+  move(10, 8, 0);
 
   //descore center
   intake.spin(reverse, 13, volt);
