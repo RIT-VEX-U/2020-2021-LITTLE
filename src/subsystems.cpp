@@ -51,8 +51,10 @@ void deploy(){
   while(bottom_roller1.torque(Nm) > .25 || mid_roller.torque(Nm) > .25){ //wait until the load is released from the motor
    wait(20,msec);
   }
+  top_roller.spin(fwd, 13, volt); //prevent hood from catching
   bottom_rollers.stop();
-  wait(500, msec);
+  wait(500, msec); //allow ball to shoot back
+  top_roller.stop();
 }
 
 // -- INDEXING -- 
@@ -139,21 +141,22 @@ void runIntake(){
         uptake(13,2,8); //run uptake until ball reaches the top roller
       }else if (topSensor) { // if there is a ball at the top
          intake.spin(fwd, 13, volt);
-         uptake(-5, 1, 1);
+         uptake(-5, 2, 1);
       }else{
          intake.spin(fwd, 13, volt); //otherwise, just run intakes
-         bottom_rollers.stop(brake);
+         uptake(-5, 2, 0);
       }
    }else if(master.ButtonR2.pressing()){ //regular outtake
         intake.spin(reverse, 13, volt);
-       uptake(-13, -13, -13);
+        uptake(-13, -13, -13);
        if(master.ButtonL2.pressing()){ //center goal descore
          bottom_rollers.stop(brake);
          top_roller.stop(brake);
          intake.spin(reverse, 13, volt); //only outtake intakes
        }
    }else{
-      bottom_rollers.stop(brake);
+      //bottom_rollers.stop(brake);
+      mid_roller.spin(fwd, 2, volt);
       //top_roller.spin(reverse, 4, volt); //always run backwards unless shooting
       top_roller.stop();
       intake.stop();
@@ -186,7 +189,7 @@ void shoot(int balls, bool indexBall = true){
 
        if(topSensor != prevVal){ //if the ball leaves the top sensor -- presumably shot by the top roller
           ballShot = true; //allow top ball to exit fully because sensor is placed lower than top roller
-          wait(350, msec);
+          wait(250, msec);
        }
 
       wait(20, msec);
