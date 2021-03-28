@@ -189,7 +189,7 @@ void shoot(int balls, bool indexBall = true){
 
        if(topSensor != prevVal){ //if the ball leaves the top sensor -- presumably shot by the top roller
           ballShot = true; //allow top ball to exit fully because sensor is placed lower than top roller
-          wait(250, msec);
+          wait(300, msec);
        }
 
       wait(20, msec);

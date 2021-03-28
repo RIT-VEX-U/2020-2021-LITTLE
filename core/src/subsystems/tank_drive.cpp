@@ -76,7 +76,7 @@ float prevAngle; //allows robot to follow the line defined by the angle defined 
 
 int entryTime;
 
-bool TankDrive::drive_forward(double inches, double volt)
+bool TankDrive::drive_forward(double inches, double volt, double minVol)
 {
   // On the first run of the funciton, reset the motor position and PID
   if (initialize_func)
@@ -102,8 +102,8 @@ bool TankDrive::drive_forward(double inches, double volt)
   double pid_out = drive_pid.get();
   int sign = pid_out/fabs(pid_out);
 
-  if(fabs(pid_out) < 2)
-    pid_out = 2 * sign;
+  if(fabs(pid_out) < minVol)
+    pid_out = minVol * sign;
   //std::cout << "output: " << pid_out << "\n" << std::flush;
 
   double turnPower;
@@ -138,7 +138,7 @@ bool TankDrive::drive_forward(double inches, double volt)
  * 
  * Uses a PID loop for it's control.
  */
-bool TankDrive::turn_degrees(double degrees, double volt)
+bool TankDrive::turn_degrees(double degrees, double volt, double minVol)
 {
   // On the first run of the funciton, reset the gyro position and PID
   if (initialize_func)
@@ -160,8 +160,8 @@ bool TankDrive::turn_degrees(double degrees, double volt)
   std::cout << "out: " << pid_out << std::endl;
   int sign = pid_out/fabs(pid_out);
 
-  if(fabs(pid_out) < 2.7) //prevent from not being able to move
-    pid_out = 2.7*sign;
+  if(fabs(pid_out) < minVol) //prevent from not being able to move
+    pid_out = minVol*sign;
 
   drive_volt(pid_out, -pid_out);
   std::cout << "" << pid_out << std::endl;

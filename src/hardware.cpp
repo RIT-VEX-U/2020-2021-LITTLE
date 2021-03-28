@@ -28,8 +28,8 @@ TankDrive::tankdrive_config_t tank_config = {
     0.05, .08, //stay on target for 80 msec
   },
   (PID::pid_config_t) {
-    // p, i, d, f
-    .167, 0, 0.007, 0,
+    // p, i, d, f -- .167
+    .165, 0, 0.007, 0,
     // deadband, on_target_time
     1, .1, 
   
