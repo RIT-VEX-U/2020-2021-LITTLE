@@ -5,6 +5,8 @@
 inertial &TankDrive::gyro_sensor = Hardware::inertia;
 double TankDrive::curr_rotation = 0;
 
+timer settlingTimer; //keeps track of settling times
+
 using namespace Hardware;
 
 TankDrive::TankDrive(motor_group &left_motors, motor_group &right_motors, inertial &gyro_sensor, TankDrive::tankdrive_config_t &config)
@@ -72,16 +74,19 @@ void TankDrive::drive_arcade(double forward_back, double left_right)
  */
 float prevAngle; //allows robot to follow the line defined by the angle defined from the previous turn or starting angle
 
-bool TankDrive::drive_forward(double inches, double percent_speed)
+int entryTime;
+
+bool TankDrive::drive_forward(double inches, double volt, double minVol)
 {
   // On the first run of the funciton, reset the motor position and PID
   if (initialize_func)
   {
+    entryTime = settlingTimer.time(sec);
     left_motors.resetPosition();
     right_motors.resetPosition();
     drive_pid.reset();
 
-    drive_pid.set_limits(-fabs(percent_speed), fabs(percent_speed));
+    drive_pid.set_limits(-fabs(volt), fabs(volt));
 
     // setting target to # revolutions the motor has to do
     drive_pid.set_target(inches*2.78 / (PI * config.wheel_diam * config.wheel_motor_ratio));
@@ -92,27 +97,33 @@ bool TankDrive::drive_forward(double inches, double percent_speed)
   // Update PID loop and drive the robot based on it's output
   drive_pid.update((left_motors.position(rotationUnits::rev) + right_motors.position(rev))/2);
   //std::cout << "avg [rev]: " << (left_motors.position(rev) + right_motors.position(rev))/2<< std::endl;
-  //std::cout << "error: " << drive_pid.get_error() << std::endl;
+  //std::cout << "driveError: " << drive_pid.get_error() << std::endl;
 
   double pid_out = drive_pid.get();
+  int sign = pid_out/fabs(pid_out);
+
+  if(fabs(pid_out) < minVol)
+    pid_out = minVol * sign;
   //std::cout << "output: " << pid_out << "\n" << std::flush;
 
   double turnPower;
   if(fabs(inertia.rotation() - prevAngle) > .5 && fabs(drive_pid.get_error()) > 1)
-   turnPower = (inertia.rotation() - prevAngle) * .01;
+   turnPower = (inertia.rotation() - prevAngle) * 1;
   else
     turnPower = 0;
 
-    std::cout << "tp: " << turnPower << "\n" << std::flush;
+
+   // std::cout << "tp: " << turnPower << "\n" << std::flush;
 
 
-  drive_tank(pid_out - turnPower, pid_out + turnPower);
+  drive_volt(pid_out - turnPower, pid_out + turnPower);
 
   // If the robot is at it's target, return true
   if (drive_pid.is_on_target())
   {
     drive_tank(0, 0);
     initialize_func = true;
+    //std::cout << "settle time [s]: " << entryTime - settlingTimer.time(sec);
     return true;
   }
 
@@ -127,7 +138,7 @@ bool TankDrive::drive_forward(double inches, double percent_speed)
  * 
  * Uses a PID loop for it's control.
  */
-bool TankDrive::turn_degrees(double degrees, double percent_speed)
+bool TankDrive::turn_degrees(double degrees, double volt, double minVol)
 {
   // On the first run of the funciton, reset the gyro position and PID
   if (initialize_func)
@@ -135,25 +146,30 @@ bool TankDrive::turn_degrees(double degrees, double percent_speed)
     prevAngle = degrees; //update global variable between drive function and turn function
     turn_pid.reset();
 
-    turn_pid.set_limits(-fabs(percent_speed), fabs(percent_speed));
+    turn_pid.set_limits(-fabs(volt), fabs(volt));
     turn_pid.set_target(degrees);
-
-    task gyro_sample = task(&TankDrive::gyroSample);
 
     initialize_func = false;
   }
 
   // Update PID loop and drive the robot based on it's output
-  turn_pid.update(gyro_sensor.rotation(deg));
+  turn_pid.update(inertia.rotation(deg));
+  std::cout << "e [deg]: " << turn_pid.get_error() << std::endl;
+
   double pid_out = turn_pid.get();
-  //std::cout << "pid out: " << pid_out << "\n" << std::flush;
-  drive_tank(pid_out, -pid_out);
+  std::cout << "out: " << pid_out << std::endl;
+  int sign = pid_out/fabs(pid_out);
+
+  if(fabs(pid_out) < minVol) //prevent from not being able to move
+    pid_out = minVol*sign;
+
+  drive_volt(pid_out, -pid_out);
+  std::cout << "" << pid_out << std::endl;
 
   // If the robot is at it's target, return true
   if (turn_pid.is_on_target())
   {
     drive_tank(0, 0);
-    gyro_sample.stop();
     initialize_func = true;
     return true;
   }

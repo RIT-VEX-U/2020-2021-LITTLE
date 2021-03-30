@@ -6,6 +6,7 @@ using namespace Hardware;
 
 thread autonSensors;
 
+timer skillsTime;
 /**
  * DRIVING TEST AUTO:
  */
@@ -22,14 +23,14 @@ void driveTest() {
 //                                                                   //
 ///////////////////////////////////////////////////////////////////////
 
-void move(float target, float speed, float waitTime){ //pct for speed
-  while(!tank_drive.drive_forward(target, speed)){vexDelay(20);} //move towards goal 
+void move(float target, float volt, float waitTime, float minVoltage = 2){ //pct for speed
+  while(!tank_drive.drive_forward(target, volt, minVoltage)){vexDelay(20);} //move towards goal -- cap minimum voltage for so not to stall out at the goal
   tank_drive.stop();
   wait(waitTime, timeUnits::msec);
 }
 
-void turnTo(float target, float percent, float waitTime){
-  while(!tank_drive.turn_degrees(target, 100)){vexDelay(20);} //move towards goal 
+void turnTo(float target, float volt, float waitTime, float minVol = 2.7){
+  while(!tank_drive.turn_degrees(target, waitTime, minVol)){vexDelay(20);} //move towards goal 
   tank_drive.stop();
   wait(waitTime, timeUnits::msec);
 }
@@ -60,6 +61,8 @@ void Auto::autonomous(){
   rf.setBrake(brake);
   rr.setBrake(brake);
   rr2.setBrake(brake);
+  
+  int entryTime = skillsTime.time(sec);
 
   deploy(); //score into side goal
 
@@ -67,208 +70,206 @@ void Auto::autonomous(){
   //intake first balls in line
   intake.spin(fwd, 13, volt);
   uptake(0,0,2);
-  move(25, 1, 0);
+  move(25, 13, 0);
   index();
   
-  turnTo(-61, 1, 0); //intake second ball slowly
-  move(28.5, 1, 100); //subtract some distance to prevent robot from bottoming out on wall
-  intake.stop();
+  turnTo(-61, 13, 0); //intake second ball slowly
+  //move(27.6, 13, 0); //subtract some distance to prevent robot from bottoming out on wall
+  move(27, 13, 0);
 
   //back up to goal
-  move(-31 + offset + 2.5, 1, 0); //add to offset to counter previous offset
+  move(-32.5 + offset + 2.5, 11, 0); //add to offset to counter previous offset
+  intake.stop();
+  uptake(0,0,0);
 
   //turn to goal
-  turnTo(-118.5, 1.0, 100);
+  turnTo(-121, 11, 100);
 
   //move towards goal 
-  move(35.8 - offset - descoringOffset, 1, 0); //subtract offset twice
+  move(36.2 - offset - descoringOffset, 0, 6); //subtract offset twice -- min voltage of 4
 
   //Score balls and descore two from corner
-  intake.rotateFor(fwd, 1, rev, 100, velocityUnits::pct, false); //descore while shooting
+  intake.rotateFor(fwd, 1.3, rev, 100, velocityUnits::pct, false); //descore while shooting
   shoot(1);
-  intake.rotateFor(fwd, 1, rev, 100, velocityUnits::pct, false); //descore while shooting
+  intake.rotateFor(fwd, 1.5, rev, 100, velocityUnits::pct, false); //descore while shooting
   shoot(1);
  
   //backout and spit out blue balls slowly
   uptake(-13, -13, -7);
   intake.spin(reverse, 10, volt);
-  move(-17 + descoringOffset, 13, 0);
+  wait(200, msec);
+  move(-24 + descoringOffset, 13, 0);
   intake.stop();
 
   //turn to ball
-  turnTo(3.2, 1, 0); 
+  turnTo(2.3, 13, 0); 
   
 //score side tower/////////////////////////////////////////////////////////////
   //move to ball and intake
   intake.spin(fwd, 13, volt);
-  move(44 + offset, 1, 0);
+  move(43 + offset, 13, 0);
   intake.stop();
-  
-  while(!tank_drive.drive_forward(-5, 1)){
-    index(); 
-    vexDelay(20);
-    } //move towards goal 
-  tank_drive.stop();
-  
+  index();
+  move(-6.5, 13, 0);
  
   //turn to the goal and score
-  turnTo(-90, 1.0, 100);
-  move(8, 1, 0);
-  intake.rotateFor(fwd, 1, rev, 100, velocityUnits::pct, false); //descore while shooting
+  turnTo(-82, 13, 0);
+  move(8.6, 13, 0, 6);
+  intake.rotateFor(fwd, 1.5, rev, 100, velocityUnits::pct, false); //descore while shooting
   shoot(1);
 
   //back away from goal and spit out blue ball
   intake.spin(reverse, 8, volt);
   uptake(0,0,-13);
-  move(-19.35, 13, 0);
+  move(-20.5, 13, 0);
   uptake(0,0,0);
   intake.stop();
 
   //turn to diagonal ball and intake
-  turnTo(8, 1.0, 100);
+  turnTo(12, 13, 0);
   intake.spin(fwd, 13, volt); //intake ball
-  move(45, 1, 0);
+  move(45.5, 13, 0);
   index();
   intake.stop();
-  move(-8, 13, 0); //back out to face goal
+
+  move(-5.5, 13, 0); //back out to face goal
 
 
 //score 2nd corner goal/////////////////////////////////////////////////////////////
-  turnTo(-45, 1.0, 100);
-  move(32, 1, 0); //move to goal
+  turnTo(-40.5, 11, 0);
+  move(29, 11, 0, 5); //move to goal
   //descore before shooting
-  intake.rotateFor(fwd, 3.5, rev, 100, velocityUnits::pct); 
+  intake.rotateFor(fwd, 3.4, rev, 100, velocityUnits::pct, false); 
   shoot(1); //score
 
   //backout and spit out balls
   uptake(-13, -13, -7);
   intake.spin(reverse, 8, volt);
-  move(-34.47, 13, 0);
+  move(-34, 13, 0);
   intake.stop();
 
   //turn to ball on diagonal and intake
-  turnTo(45, .8, 100); //slow speed for long movements after turns
-  move(14, 13, 0);
+  turnTo(119, 13, 0); //slow speed for long movements after turns
   intake.spin(fwd, 13, volt);
-  move(18, 7, 200);
+  move(39, 10, 0);
   intake.stop();
+  index();
   
 
 //score 2nd side goal/////////////////////////////////////////////////////////////
-  move(-10, 13, 0); //backup to goal
-  turnTo(-90, 1, 100); //face goal head on
+  turnTo(5, 13, 0);
 
   //score ball and descore tower
-  move(30, 13, 0);
-  move(5, 5, 100);
-  intake.rotateFor(fwd, descoringRotation, rev); //blocking code
+  move(36.5, 11, 0, 5);
+  intake.rotateFor(fwd, 1.2, rev, 100, velocityUnits::pct); //blocking code
   shoot(1);
 
   //back out and spit ball out
-  intake.spin(reverse, 7, volt);
-  move(-15, 13, 0);
+  move(-12, 13, 0);
+  turnTo(-30, 13, 0, 3);
+  intake.spin(reverse, 13, volt);
+  uptake(-13, -13, -13);
+  wait(500, msec);
   intake.stop();
+  uptake(0,0,0);
 
 //score 3rd corner goal/////////////////////////////////////////////////////////////
   //turn to ball and intake
-  turnTo(90, 1, 100);
-  move(20, 13, 0);
+  turnTo(94.5, 13, 0);
   intake.spin(fwd, 13, volt);
-  move(5, 13, 200);
+  move(48.5, 13, 0);
+  index();
   intake.stop();
 
   //turn to goal and descore 2 then score 1
-  turnTo(-35, 1, 0);
-  move(30, 13, 0);
-  move(5, 8, 100);
-  intake.rotateFor(fwd, descoringRotation*2, rev); //blocking
+  turnTo(46, 13, 0);
+  move(14.5, 11, 0, 7);
+  intake.rotateFor(fwd, 3.4, rev, 100, velocityUnits::pct, false); //blocking
   shoot(1);
 
   //backout and spit out balls
+  uptake(-13, -13, -7);
   intake.spin(reverse, 8, volt);
-  move(-20, 13, 0);
+  move(-27.5, 13, 0);
 
 //score 3rd side goal/////////////////////////////////////////////////////////////
-  //turn to second back ball and intake
-  turnTo(135, 13, 150);
-  move(25, 13, 0);
+  //turn to ball and intake
+  turnTo(180, 13, 0);
   intake.spin(fwd, 13, volt);
-  move(5, 7, 200);
+  move(40, 13, 0);
   intake.stop();
   index();
-
-  //turn to goal and intake 2nd ball
-  turnTo(-135, 1, 100);
-  move(10, 13, 0);
-  intake.spin(fwd, 13, volt);
-  move(5, 7, 200);
-  intake.stop();
-
-  //descore one, shoot two 
-  intake.rotateFor(fwd, descoringRotation, rev);
-  shoot(2);
+  
+  //turn to goal score
+  turnTo(91, 13, 0);
+  move(11.2, 11, 0, 6);
+  intake.rotateFor(fwd, 1.5, rev, 100, velocityUnits::pct, false); 
+  shoot(1);
 
   //back out and spit out blue ball
-  intake.spin(reverse, 7, volt);
+  uptake(-13, -8, -8);
+  intake.spin(reverse, 8, volt);
   move(-15, 13, 0);
   intake.stop();
+  uptake(0,0,0);
 
 
 //score last corner goal/////////////////////////////////////////////////////////////
   //turn to ball and intake
-  turnTo(110, 1, 100);
-  move(30, 13, 0);
+  turnTo(198.5, 13, 0);
   intake.spin(fwd, 13, volt);
-  move(5, 7, 100);
+  move(46, 13, 0);
   intake.stop();
   index();
+  move(-5, 13, 0);
 
-  //back up to goal and descore 2, shoot 1
-  move(-10, 13, 0);
-  turnTo(-100, 1, 100);
-  move(15, 13, 0);
-  move(5, 7, 100);
-  intake.rotateFor(fwd, descoringRotation, rev);
+  //turn to goal and score
+  turnTo(135, 13, 0);
+  move(30, 11, 0, 6);
+  intake.rotateFor(fwd, 3.3, rev, 100, velocityUnits::pct, false);
   shoot(1);
-  intake.rotateFor(fwd, descoringRotation, rev);
 
 //center goal/////////////////////////////////////////////////////////////
 
   //spit out last balls and intake final ball
-  uptake(-13, -8, -5);
-  intake.spin(reverse, 5, volt);
-  move(-25,13, 0);
+  uptake(-13, -8, -8);
+  intake.spin(reverse, 8, volt);
+  move(-35, 13, 0);
   uptake(0,0,0);
   
   //turn to final ball and intake
-  turnTo(-170, 1, 100);
-  move(10, 13, 0);
+  turnTo(299, 13, 0);
   intake.spin(fwd, 13, volt);
-  move(5, 7, 200);
+  move(30.5, 13, 0);
   intake.stop();
   index();
 
   //turn to goal and to descore
-  turnTo(-100,1, 100);
-  move(10, 13, 0);
-  //descore center
-  intake.spin(reverse, 13, volt);
-  move(5, 10, 0);
-  move(-5, 10, 0);
+  turnTo(367, 13, 0);
+  intake.spin(reverse, 13, volt); //descore center
+  move(15, 13, 0, 8);
+  move(-5, 13, 0);
 
-  move(5, 10, 0);
-  move(-5, 10, 0);
+  move(6, 13, 0, 7);
+  move(-6, 13, 0);
 
-  move(5, 10, 0);
-  move(-5, 10, 0);
+  move(6, 13, 0, 7);
+  move(-6, 13, 0);
 
   //shoot last ball
-  move(5, 5, 100);
-  shoot(1);
+  //move(7, 13, 100, 12);
+  move(8, 13, 0, 9);
+  //turnTo(350, 13, 0, 3);
+  shoot(1, false);
 
   
   //backout to clear goal
   move(-10, 13, 0);
+  intake.stop();
+
+  v5_brain.Screen.clearScreen();
+  v5_brain.Screen.setCursor(1,1);
+  v5_brain.Screen.print(skillsTime.time(sec) - entryTime);
 
 
   //Autonomous Loop

@@ -18,7 +18,8 @@ timer t = timer(); //general timer
 */
 void uptake(int top, int middle, int bottom){
   bottom_roller1.spin(fwd, bottom, volt);
-  bottom_roller2.spin(fwd, middle, volt);
+  bottom_roller2.spin(fwd, bottom, volt);
+  mid_roller.spin(fwd, middle, volt);
   top_roller.spin(fwd, top, volt);
 }
 
@@ -26,7 +27,7 @@ void uptake(int top, int middle, int bottom){
 * Directly control how many revolutions each motor makes
 */
 void uptakeRevolution(int top, int bottom, int speed){
-  bottom_roller.rotateFor(bottom, rev, speed, velocityUnits::pct);
+  bottom_rollers.rotateFor(bottom, rev, speed, velocityUnits::pct);
   top_roller.rotateFor(top, rev, speed, velocityUnits::pct, true); 
 }
 
@@ -35,7 +36,7 @@ void uptakeRevolution(int top, int bottom, int speed){
 */
 void stopAll(){
   intake.stop();
-  bottom_roller.stop();
+  bottom_rollers.stop();
   top_roller.stop();
 }
 
@@ -43,11 +44,17 @@ void stopAll(){
 * at the start of opcontrol/autonomous deploy hood and intakes
 */
 void deploy(){
-  bottom_roller2.spin(fwd, 13, volt); //release hood
-  bottom_roller1.spin(reverse, 13, volt); //release intakes
-  wait(500,msec); //allow time for all parts to release
-  bottom_roller.stop(); 
-  wait(1000, msec);
+      bottom_roller2.spin(reverse, 13, volt); //release hood
+      bottom_roller1.spin(reverse, 13, volt); //release intakes
+      mid_roller.spin(fwd, 13, volt);
+      wait(100,msec);
+  while(bottom_roller1.torque(Nm) > .25 || mid_roller.torque(Nm) > .25){ //wait until the load is released from the motor
+   wait(20,msec);
+  }
+  top_roller.spin(fwd, 13, volt); //prevent hood from catching
+  bottom_rollers.stop();
+  wait(500, msec); //allow ball to shoot back
+  top_roller.stop();
 }
 
 // -- INDEXING -- 
@@ -111,7 +118,7 @@ void index(){ //for after shooting
     double timeEntered = t.time(msec);
 
     while(!topSensor){
-      if(t.time() - timeEntered > 500)
+      if(t.time() - timeEntered > 800)
         break;
         
       uptake(-10,2,8); //move ball up to second roller
@@ -134,21 +141,22 @@ void runIntake(){
         uptake(13,2,8); //run uptake until ball reaches the top roller
       }else if (topSensor) { // if there is a ball at the top
          intake.spin(fwd, 13, volt);
-         uptake(-5, 1, 1);
+         uptake(-5, 2, 1);
       }else{
          intake.spin(fwd, 13, volt); //otherwise, just run intakes
-         bottom_roller.stop(brake);
+         uptake(-5, 2, 0);
       }
    }else if(master.ButtonR2.pressing()){ //regular outtake
         intake.spin(reverse, 13, volt);
-       uptake(-13, -13, -13);
+        uptake(-13, -13, -13);
        if(master.ButtonL2.pressing()){ //center goal descore
-         bottom_roller.stop(brake);
+         bottom_rollers.stop(brake);
          top_roller.stop(brake);
          intake.spin(reverse, 13, volt); //only outtake intakes
        }
    }else{
-      bottom_roller.stop(brake);
+      //bottom_rollers.stop(brake);
+      mid_roller.spin(fwd, 2, volt);
       //top_roller.spin(reverse, 4, volt); //always run backwards unless shooting
       top_roller.stop();
       intake.stop();
@@ -166,7 +174,7 @@ void runIntake(){
 
 void shoot(int balls, bool indexBall = true){ 
   bool prevVal = topSensor, ballShot;
-  int entryTime, shootTime = 1000, indexTime = 1000, exitTime; //shoot time determines how long before loop cuts out to prevent stuck loops
+  int entryTime, shootTime = 1000, indexTime = 800, exitTime; //shoot time determines how long before loop cuts out to prevent stuck loops
 
   for(int i = 0; i < balls; i++){ //cycle through a shoot cycle depending on how many balls need to be shot
     ballShot = false; //reset exit conditions
@@ -177,16 +185,16 @@ void shoot(int balls, bool indexBall = true){
 
        top_roller.spin(fwd, 13, volt);
        wait(200, msec); //get up to speed –– first ball should always be well under the top roller
-       bottom_roller2.spin(fwd, 13, volt); //shoot top indexed ball only
+       mid_roller.spin(fwd, 13, volt); //shoot top indexed ball only
 
        if(topSensor != prevVal){ //if the ball leaves the top sensor -- presumably shot by the top roller
           ballShot = true; //allow top ball to exit fully because sensor is placed lower than top roller
-          wait(200, msec);
+          wait(300, msec);
        }
 
       wait(20, msec);
     }
-    exitTime = t.time();
+    exitTime = t.time(msec);
     //after ball gets shot
     top_roller.spin(reverse, 8, volt); //prevent other balls from exiting
 
